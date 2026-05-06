@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
 import { RatingStars } from "@/components/shared/rating-stars";
 import { BadgeVerified, BadgeBrandTier } from "@/components/shared/badge-verified";
 import {
@@ -466,9 +465,12 @@ export default async function ServiceAreaPage({ params }: PageProps) {
         {total === 0 && (
           <div className="text-center py-12">
             <p className="text-sm text-muted-foreground mb-4">Chưa có đại lý nào tại {wardLabel}.</p>
-            <Button variant="outline" asChild>
-              <Link href={`/${service}/${province}`}>Xem tất cả đại lý tại {provinceLabel}</Link>
-            </Button>
+            <Link
+              href={`/${service}/${province}`}
+              className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-3 py-1.5 text-sm font-medium hover:bg-muted transition-colors"
+            >
+              Xem tất cả đại lý tại {provinceLabel}
+            </Link>
           </div>
         )}
       </div>

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+
 import { Separator } from "@/components/ui/separator";
 import { RatingStars } from "@/components/shared/rating-stars";
 import { BadgeVerified, BadgeBrandTier } from "@/components/shared/badge-verified";
@@ -251,9 +251,12 @@ export default async function ServiceRootPage({ params }: PageProps) {
 
         {/* CTA */}
         <div className="text-center pt-4">
-          <Button variant="outline" asChild>
-            <Link href={`/agent`}>Xem tất cả đại lý {serviceLabel}</Link>
-          </Button>
+          <Link
+            href="/agent"
+            className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-3 py-1.5 text-sm font-medium hover:bg-muted transition-colors"
+          >
+            Xem tất cả đại lý {serviceLabel}
+          </Link>
         </div>
       </div>
     </>
