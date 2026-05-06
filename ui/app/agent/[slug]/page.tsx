@@ -184,6 +184,8 @@ export default function AgentLocationBasedPage() {
           <BreadcrumbList>
             <BreadcrumbItem><BreadcrumbLink href="/">Trang chủ</BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
+            <BreadcrumbItem><BreadcrumbLink href="/bds">Đại lý BĐS</BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbSeparator />
             <BreadcrumbItem><BreadcrumbLink href="/bds/tp-ho-chi-minh">Đại lý BĐS TP.HCM</BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem><BreadcrumbPage>{agent.name}</BreadcrumbPage></BreadcrumbItem>

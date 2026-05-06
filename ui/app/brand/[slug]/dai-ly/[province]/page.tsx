@@ -57,8 +57,6 @@ export default async function BrandDealerProvincePage({ params }: PageProps) {
             <BreadcrumbSeparator />
             <BreadcrumbItem><BreadcrumbLink href={`/brand/${slug}`}>{brand.name}</BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem><BreadcrumbLink href={`/brand/${slug}/dai-ly`}>Đại lý</BreadcrumbLink></BreadcrumbItem>
-            <BreadcrumbSeparator />
             <BreadcrumbItem><BreadcrumbPage>{provinceLabel}</BreadcrumbPage></BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>

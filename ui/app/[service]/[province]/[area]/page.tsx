@@ -267,41 +267,44 @@ export default async function ServiceAreaPage({ params }: PageProps) {
               </div>
               <div className="space-y-2">
                 {clusterAgents.map((agent) => (
-                  <Link key={agent.slug} href={`/agent/${agent.slug}`}>
-                    <Card className="hover:border-primary/40 transition-colors cursor-pointer">
-                      <CardContent className="p-3 flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-primary text-sm shrink-0">
-                          {agent.name.charAt(0)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <p className="font-medium text-sm">{agent.name}</p>
-                            <BadgeVerified label="✓" />
-                            {agent.brand_tier && <BadgeBrandTier tier={agent.brand_tier} />}
+                  <div key={agent.slug} className="relative">
+                    <Link href={`/agent/${agent.slug}`} className="block">
+                      <Card className="hover:border-primary/40 transition-colors cursor-pointer">
+                        <CardContent className="p-3 flex items-center gap-3">
+                          <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-primary text-sm shrink-0">
+                            {agent.name.charAt(0)}
                           </div>
-                          <p className="text-xs text-muted-foreground">{agent.title}</p>
-                          {agent.ward_label && (
-                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                              <MapPin className="h-2.5 w-2.5" />
-                              {agent.ward_label} <span className="opacity-60">({agent.legacy_district})</span>
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <div className="text-right hidden sm:block">
-                            <p className="text-xs text-muted-foreground">{agent.years_experience} năm KN</p>
-                            <RatingStars rating={agent.rating} count={agent.review_count} size="sm" showCount={false} />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <p className="font-medium text-sm">{agent.name}</p>
+                              <BadgeVerified label="✓" />
+                              {agent.brand_tier && <BadgeBrandTier tier={agent.brand_tier} />}
+                            </div>
+                            <p className="text-xs text-muted-foreground">{agent.title}</p>
+                            {agent.ward_label && (
+                              <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                                <MapPin className="h-2.5 w-2.5" />
+                                {agent.ward_label} <span className="opacity-60">({agent.legacy_district})</span>
+                              </p>
+                            )}
                           </div>
-                          <a
-                            href={`tel:${agent.phone}`}
-                            className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md border hover:bg-muted transition-colors"
-                          >
-                            <Phone className="h-3 w-3" />Gọi
-                          </a>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <div className="text-right hidden sm:block">
+                              <p className="text-xs text-muted-foreground">{agent.years_experience} năm KN</p>
+                              <RatingStars rating={agent.rating} count={agent.review_count} size="sm" showCount={false} />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                    <a
+                      href={`tel:${agent.phone}`}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md border hover:bg-muted transition-colors bg-background"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Phone className="h-3 w-3" />Gọi
+                    </a>
+                  </div>
                 ))}
               </div>
             </section>

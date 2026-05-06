@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AppSidebar } from "@/components/layout/app-sidebar";
+import { AppSidebar, MobileTopBar } from "@/components/layout/app-sidebar";
 import { SiteFooter } from "@/components/layout/site-footer";
 
 const inter = Inter({
@@ -79,11 +79,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           disableTransitionOnChange
         >
           <TooltipProvider>
-            {/* Sidebar layout: sidebar | main */}
-            <div className="flex min-h-screen">
+            {/* Mobile topbar — fixed, full viewport width, ngoài max-w shell */}
+            <MobileTopBar />
+
+            {/* App shell — max-w-7xl canh giữa, bao gồm sidebar + main */}
+            <div className="flex min-h-screen max-w-7xl mx-auto w-full">
               <AppSidebar />
               <div className="flex flex-col flex-1 min-w-0">
-                <main className="flex-1">{children}</main>
+                {/* pt-12 trên mobile để offset fixed topbar 48px */}
+                <main className="flex-1 pt-12 md:pt-0">{children}</main>
                 <SiteFooter />
               </div>
             </div>

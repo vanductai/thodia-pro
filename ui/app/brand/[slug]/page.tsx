@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { RatingStars } from "@/components/shared/rating-stars";
 import { BadgeBrandTier } from "@/components/shared/badge-verified";
 import {
@@ -9,6 +10,8 @@ import {
   BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { MapPin, ExternalLink, Users, Building2, Globe } from "lucide-react";
+import { BrandProvinceCTA } from "@/components/brand/brand-province-cta";
+import { getProvinceLabel } from "@/lib/mock-data";
 
 const BRAND = {
   name: "VinFast",
@@ -109,12 +112,12 @@ export default function BrandPage() {
                 <div className="flex items-center gap-1.5"><Users className="h-4 w-4 text-primary" />
                   <strong>{brand.stats.agents_freelance}</strong> đại lý độc lập</div>
               </div>
-              <div className="mt-4 flex gap-2">
-                <Link href={`/brand/${brand.slug}/dai-ly/tp-ho-chi-minh`} className="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-                  Tìm đại lý gần tôi
-                </Link>
-                <a href={brand.website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-lg border border-border bg-background hover:bg-muted transition-colors">
-                  <Globe className="h-4 w-4 mr-2" />Website chính thức <ExternalLink className="h-3 w-3 ml-1" />
+              <BrandProvinceCTA brandSlug={brand.slug} provinces={brand.provinces} />
+              <div className="mt-2">
+                <a href={brand.website} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="sm">
+                    <Globe className="h-4 w-4" />Website chính thức <ExternalLink className="h-3 w-3" />
+                  </Button>
                 </a>
               </div>
             </div>
@@ -146,14 +149,6 @@ export default function BrandPage() {
                 </Card>
               </Link>
             ))}
-            <Link href={`/brand/${brand.slug}/dai-ly`}>
-              <Card className="hover:shadow-md transition-all cursor-pointer h-full border-dashed">
-                <CardContent className="p-4 text-center">
-                  <p className="font-medium text-sm text-muted-foreground">Xem tất cả</p>
-                  <p className="text-xs text-primary">{brand.stats.provinces} tỉnh/TP →</p>
-                </CardContent>
-              </Card>
-            </Link>
           </div>
         </section>
 
@@ -164,7 +159,7 @@ export default function BrandPage() {
           <h2 className="text-xl font-semibold mb-4">Đại lý {brand.name} nổi bật</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {brand.featured_dealers.map((d) => (
-              <Link key={d.slug} href={`/${d.tinh}/${d.phuong}/${d.slug}`}>
+              <Link key={d.slug} href={`/locations/${d.tinh}/${d.phuong}/${d.slug}`}>
                 <Card className="hover:shadow-md transition-shadow h-full">
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between gap-2">
@@ -175,7 +170,7 @@ export default function BrandPage() {
                   <CardContent className="pt-0">
                     <RatingStars rating={d.rating} count={d.reviews} size="sm" />
                     <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-                      <MapPin className="h-3 w-3" />{d.tinh.replace(/-/g, " ")}
+                      <MapPin className="h-3 w-3" />{getProvinceLabel(d.tinh)}
                     </div>
                   </CardContent>
                 </Card>

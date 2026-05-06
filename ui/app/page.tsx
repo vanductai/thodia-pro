@@ -81,7 +81,7 @@ export default function HomePage() {
             {CATEGORIES.map((cat) => {
               const Icon = cat.icon;
               return (
-                <Link key={cat.slug} href={`/${cat.slug}/tp-ho-chi-minh`}>
+                <Link key={cat.slug} href={`/${cat.slug}`}>
                   <Card className="hover:border-primary/40 hover:bg-muted/30 transition-colors cursor-pointer">
                     <CardContent className="p-4 flex items-center gap-3">
                       <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">

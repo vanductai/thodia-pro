@@ -6,10 +6,10 @@ export function SiteFooter() {
     <footer className="border-t">
       <div className="px-4 py-6 text-xs text-muted-foreground">
         <div className="flex flex-wrap gap-x-6 gap-y-2 mb-4">
-          <Link href="/bds/tp-ho-chi-minh" className="hover:text-foreground transition-colors">Môi giới BĐS</Link>
-          <Link href="/xe-co/tp-ho-chi-minh" className="hover:text-foreground transition-colors">Đại lý xe hơi</Link>
-          <Link href="/bao-hiem/tp-ho-chi-minh" className="hover:text-foreground transition-colors">Bảo hiểm</Link>
-          <Link href="/brand/vinfast" className="hover:text-foreground transition-colors">Thương hiệu</Link>
+          <Link href="/bds" className="hover:text-foreground transition-colors">Môi giới BĐS</Link>
+          <Link href="/xe-co" className="hover:text-foreground transition-colors">Đại lý xe hơi</Link>
+          <Link href="/bao-hiem" className="hover:text-foreground transition-colors">Bảo hiểm</Link>
+          <Link href="/brand" className="hover:text-foreground transition-colors">Thương hiệu</Link>
           <Link href="/agent" className="hover:text-foreground transition-colors">Đại lý</Link>
         </div>
         <Separator className="mb-4" />

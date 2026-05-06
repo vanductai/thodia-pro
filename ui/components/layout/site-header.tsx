@@ -29,10 +29,10 @@ export function SiteHeader() {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1 mr-auto">
-          <NavLink href="/bds/tp-ho-chi-minh">BĐS</NavLink>
-          <NavLink href="/xe-co/tp-ho-chi-minh">Xe cộ</NavLink>
-          <NavLink href="/bao-hiem/tp-ho-chi-minh">Bảo hiểm</NavLink>
-          <NavLink href="/brand/vinfast">Thương hiệu</NavLink>
+          <NavLink href="/bds">BĐS</NavLink>
+          <NavLink href="/xe-co">Xe cộ</NavLink>
+          <NavLink href="/bao-hiem">Bảo hiểm</NavLink>
+          <NavLink href="/brand">Thương hiệu</NavLink>
         </nav>
 
         {/* Actions */}
@@ -78,10 +78,10 @@ export function SiteHeader() {
                 <span className="text-muted-foreground font-normal">.Thodia.so</span>
               </div>
               <nav className="flex flex-col gap-1">
-                <Link href="/bds/tp-ho-chi-minh" className="text-sm font-medium px-3 py-2 rounded-md hover:bg-muted hover:text-primary transition-colors">Bất động sản</Link>
-                <Link href="/xe-co/tp-ho-chi-minh" className="text-sm font-medium px-3 py-2 rounded-md hover:bg-muted hover:text-primary transition-colors">Xe cộ</Link>
-                <Link href="/bao-hiem/tp-ho-chi-minh" className="text-sm font-medium px-3 py-2 rounded-md hover:bg-muted hover:text-primary transition-colors">Bảo hiểm</Link>
-                <Link href="/brand/vinfast" className="text-sm font-medium px-3 py-2 rounded-md hover:bg-muted hover:text-primary transition-colors">Thương hiệu</Link>
+                <Link href="/bds" className="text-sm font-medium px-3 py-2 rounded-md hover:bg-muted hover:text-primary transition-colors">Bất động sản</Link>
+                <Link href="/xe-co" className="text-sm font-medium px-3 py-2 rounded-md hover:bg-muted hover:text-primary transition-colors">Xe cộ</Link>
+                <Link href="/bao-hiem" className="text-sm font-medium px-3 py-2 rounded-md hover:bg-muted hover:text-primary transition-colors">Bảo hiểm</Link>
+                <Link href="/brand" className="text-sm font-medium px-3 py-2 rounded-md hover:bg-muted hover:text-primary transition-colors">Thương hiệu</Link>
                 <Link href="/agent" className="text-sm font-medium px-3 py-2 rounded-md hover:bg-muted hover:text-primary transition-colors">Đại lý</Link>
               </nav>
             </SheetContent>

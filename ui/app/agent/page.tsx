@@ -10,7 +10,7 @@ import {
   BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Phone, MapPin, TrendingUp, Building2 } from "lucide-react";
-import { AGENTS, LOCATIONS } from "@/lib/mock-data";
+import { AGENTS, LOCATIONS, getProvinceLabel } from "@/lib/mock-data";
 
 export const metadata: Metadata = {
   title: "Tất cả Đại lý — Pro.Thodia.so",
@@ -71,11 +71,11 @@ export default function AgentListingPage() {
                       {agent.ward_label ? (
                         <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                           <MapPin className="h-2.5 w-2.5" />
-                          {agent.ward_label} ({agent.legacy_district}), {agent.province === "tp-ho-chi-minh" ? "TP.HCM" : agent.province}
+                          {agent.ward_label} ({agent.legacy_district}), {getProvinceLabel(agent.province ?? "")}
                         </p>
                       ) : (
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          Phủ sóng: {agent.province === "tp-ho-chi-minh" ? "TP.HCM" : "Toàn quốc"}
+                          Phủ sóng: {agent.province ? getProvinceLabel(agent.province) : "Toàn quốc"}
                         </p>
                       )}
                     </div>
@@ -120,7 +120,7 @@ export default function AgentListingPage() {
                       </div>
                       <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                         <MapPin className="h-2.5 w-2.5 shrink-0" />
-                        {loc.ward_label} ({loc.legacy_district}), {loc.province === "tp-ho-chi-minh" ? "TP.HCM" : "Đà Nẵng"}
+                        {loc.ward_label} ({loc.legacy_district}), {getProvinceLabel(loc.province)}
                       </p>
                     </div>
                     <div className="text-right shrink-0">

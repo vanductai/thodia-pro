@@ -157,6 +157,8 @@ export default function AgentFreelancePage() {
           <BreadcrumbList>
             <BreadcrumbItem><BreadcrumbLink href="/">Trang chủ</BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
+            <BreadcrumbItem><BreadcrumbLink href="/xe-co">Đại lý Xe cộ</BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbSeparator />
             <BreadcrumbItem><BreadcrumbLink href="/brand/vinfast">VinFast</BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem><BreadcrumbPage>{agent.name}</BreadcrumbPage></BreadcrumbItem>
