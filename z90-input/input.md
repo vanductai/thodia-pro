@@ -1,0 +1,8 @@
+# Pro.Thodia.so - Danh bạ Đại lý kinh doanh cấp cao
+- Pro.Thodia.so là website danh bạ dành cho agents - đại lý kinh doanh (bds, xe cộ và bảo hiểm). Mỗi đại lý kinh doanh sẽ được điền đầy đủ và chi tiết thông tin theo tiêu chuẩn mà Google quy định.
+- Website bao gồm 2 nhóm page: Agent Page (đại lý kinh doanh) và Location Page (địa điểm kinh doanh).
+- Tham khảo các file .md có trong /z90-input để nắm chắc cấu trúc hiệu quả nhất về Local SEO cho những profile page sẽ được tạo mới dành cho location & agent; phải bảo đảm sức khoẻ SEO & Local SEO cho các page này là hoàn hảo nhất có thể theo quy chuẩn mà Google cung cấp.
+- Hãy đề xuất chi tiết các thông tin cần thiết cho Agent Page và Location Page cũng như cấu trúc URL, Schema, Sitemap, RSS, robot.txt để đảm bảo sức khỏe Local SEO và thân thiện với Google.
+- Trong cấu trúc website sẽ cần có đối tượng là brand như là Vinfast, Honda, Manulife... là các brand lớn mà các agent/location sẽ là đại lý --> update lại toàn bộ tài liệu để bổ sung thêm yếu tố này.
+- Hiện tại cấu trúc hành chánh của Việt Nam đã có thay đổi so với trước đây (tỉnh thành, quận huyện, phường xã, đường phố) là bỏ đi đơn vị cấp quận nhưng thực tế user vẫn chưa thể quen thuộc với cấu trúc mới (tỉnh thành, phường xã, đường phố) --> Hãy đề xuất phương án hiệu quả nhất để tối ưu cho seo bot & user
+- Vẫn có trường hợp agent tự do làm trực tiếp với brand chứ không trực thuộc một location nào, hãy update cấu trúc lại tài liệu cho phù hợp với case này
