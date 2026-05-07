@@ -7,7 +7,7 @@ import {
   BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Building2, Users, MapPin, ArrowRight } from "lucide-react";
-import { BRANDS, SERVICES, getServiceLabel } from "@/lib/mock-data";
+import { BRANDS, getServiceLabel } from "@/lib/mock-data";
 
 export const metadata: Metadata = {
   title: "Thương hiệu đại lý tại Việt Nam — Pro.Thodia.so",

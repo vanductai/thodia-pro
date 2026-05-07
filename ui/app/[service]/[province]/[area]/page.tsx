@@ -12,12 +12,32 @@ import {
 } from "@/components/ui/breadcrumb";
 import { MapPin, Phone, Info, ArrowRight, Users, Building2 } from "lucide-react";
 import {
-  AGENTS, LOCATIONS, GEO_CLUSTERS,
-  getServiceLabel, getProvinceLabel,
+  AGENTS, LOCATIONS, GEO_CLUSTERS, SERVICES, PROVINCES,
+  getServiceLabel, getProvinceLabel, PROVINCE_GEO,
 } from "@/lib/mock-data";
 
 interface PageProps {
   params: Promise<{ service: string; province: string; area: string }>;
+}
+
+export function generateStaticParams() {
+  const serviceKeys = Object.keys(SERVICES);
+  const provinceKeys = Object.keys(PROVINCES);
+  const params: { service: string; province: string; area: string }[] = [];
+  for (const s of serviceKeys) {
+    for (const p of provinceKeys) {
+      // Add geo-cluster slugs
+      const clusters = GEO_CLUSTERS.filter((c) => c.province === p);
+      for (const c of clusters) {
+        params.push({ service: s, province: p, area: c.slug });
+        // Add individual ward slugs
+        for (const w of c.wards) {
+          params.push({ service: s, province: p, area: w.slug });
+        }
+      }
+    }
+  }
+  return params;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -72,11 +92,39 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 // ─── Schema builders ──────────────────────────────────────────────────────────
 
+function buildItemList(
+  service: string, province: string, area: string,
+  agents: typeof AGENTS, locs: typeof LOCATIONS,
+) {
+  const items = [
+    ...agents.slice(0, 8).map((a, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `https://pro.thodia.so/agent/${a.slug}`,
+      name: a.name,
+    })),
+    ...locs.slice(0, 4).map((l, i) => ({
+      "@type": "ListItem",
+      position: agents.slice(0, 8).length + i + 1,
+      url: `https://pro.thodia.so/locations/${l.province}/${l.phuong}/${l.slug}`,
+      name: l.name,
+    })),
+  ];
+  return {
+    "@type": "ItemList",
+    "@id": `https://pro.thodia.so/${service}/${province}/${area}#list`,
+    numberOfItems: agents.length + locs.length,
+    itemListElement: items,
+  };
+}
+
 function buildGeoClusterSchema(
   service: string, province: string, area: string,
   serviceLabel: string, provinceLabel: string,
   clusterLabel: string, legacy: string, total: number,
+  agents: typeof AGENTS, locs: typeof LOCATIONS,
 ) {
+  const geo = PROVINCE_GEO[province];
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -87,6 +135,14 @@ function buildGeoClusterSchema(
         description: `Danh sách ${total} đại lý ${serviceLabel} tại ${clusterLabel}, ${provinceLabel}`,
         url: `https://pro.thodia.so/${service}/${province}/${area}`,
         numberOfItems: total,
+        ...(geo && {
+          spatialCoverage: {
+            "@type": "AdministrativeArea",
+            name: `${clusterLabel}, ${provinceLabel}`,
+            geo: { "@type": "GeoCoordinates", latitude: geo.lat, longitude: geo.lng },
+          },
+        }),
+        mainEntity: buildItemList(service, province, area, agents, locs),
       },
       {
         "@type": "BreadcrumbList",
@@ -105,7 +161,9 @@ function buildWardSchema(
   service: string, province: string, area: string,
   serviceLabel: string, provinceLabel: string,
   wardLabel: string, total: number,
+  agents: typeof AGENTS, locs: typeof LOCATIONS,
 ) {
+  const geo = PROVINCE_GEO[province];
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -115,6 +173,14 @@ function buildWardSchema(
         name: `Đại lý ${serviceLabel} tại ${wardLabel}, ${provinceLabel}`,
         url: `https://pro.thodia.so/${service}/${province}/${area}`,
         numberOfItems: total,
+        ...(geo && {
+          spatialCoverage: {
+            "@type": "AdministrativeArea",
+            name: `${wardLabel}, ${provinceLabel}`,
+            geo: { "@type": "GeoCoordinates", latitude: geo.lat, longitude: geo.lng },
+          },
+        }),
+        mainEntity: buildItemList(service, province, area, agents, locs),
       },
       {
         "@type": "BreadcrumbList",
@@ -155,7 +221,7 @@ export default async function ServiceAreaPage({ params }: PageProps) {
       (l) => l.category === service && l.province === province && clusterWardSlugs.includes(l.phuong),
     );
 
-    const schema = buildGeoClusterSchema(service, province, area, serviceLabel, provinceLabel, clusterLabel, legacy, total);
+    const schema = buildGeoClusterSchema(service, province, area, serviceLabel, provinceLabel, clusterLabel, legacy, total, clusterAgents, clusterLocs);
 
     return (
       <>
@@ -300,7 +366,6 @@ export default async function ServiceAreaPage({ params }: PageProps) {
                     <a
                       href={`tel:${agent.phone}`}
                       className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md border hover:bg-muted transition-colors bg-background"
-                      onClick={(e) => e.stopPropagation()}
                     >
                       <Phone className="h-3 w-3" />Gọi
                     </a>
@@ -335,7 +400,7 @@ export default async function ServiceAreaPage({ params }: PageProps) {
     (c) => c.province === province && c.wards.some((w) => w.slug === area),
   );
 
-  const schema = buildWardSchema(service, province, area, serviceLabel, provinceLabel, wardLabel, total);
+  const schema = buildWardSchema(service, province, area, serviceLabel, provinceLabel, wardLabel, total, wardAgents, wardLocs);
 
   return (
     <>

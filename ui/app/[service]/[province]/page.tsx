@@ -2,39 +2,72 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { RatingStars } from "@/components/shared/rating-stars";
 import { BadgeVerified, BadgeBrandTier } from "@/components/shared/badge-verified";
+import { FilterBar } from "@/components/shared/filter-bar";
 import {
   Breadcrumb, BreadcrumbItem, BreadcrumbLink,
   BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { MapPin, Phone, Search, SlidersHorizontal, Users, Building2 } from "lucide-react";
+import { MapPin, Phone, Users, Building2 } from "lucide-react";
 import {
-  AGENTS, LOCATIONS, GEO_CLUSTERS,
+  AGENTS, LOCATIONS, GEO_CLUSTERS, SERVICES, PROVINCES,
   getAgentsByService, getLocationsByProvince,
-  getServiceLabel, getProvinceLabel,
+  getServiceLabel, getProvinceLabel, PROVINCE_GEO,
 } from "@/lib/mock-data";
 
 interface PageProps {
   params: Promise<{ service: string; province: string }>;
 }
 
+export function generateStaticParams() {
+  const serviceKeys = Object.keys(SERVICES);
+  const provinceKeys = Object.keys(PROVINCES);
+  return serviceKeys.flatMap((s) => provinceKeys.map((p) => ({ service: s, province: p })));
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { service, province } = await params;
   const serviceLabel = getServiceLabel(service);
   const provinceLabel = getProvinceLabel(province);
+  const geo = PROVINCE_GEO[province];
   return {
     title: `Đại lý ${serviceLabel} uy tín tại ${provinceLabel}`,
     description: `Tìm đại lý ${serviceLabel} đã xác minh tại ${provinceLabel}. Thông tin chuẩn xác, liên hệ trực tiếp.`,
     alternates: { canonical: `https://pro.thodia.so/${service}/${province}` },
+    ...(geo && {
+      other: {
+        "geo.region": geo.iso,
+        "geo.placename": provinceLabel,
+        "geo.position": `${geo.lat};${geo.lng}`,
+        "ICBM": `${geo.lat}, ${geo.lng}`,
+      },
+    }),
   };
 }
 
-function buildSchema(service: string, province: string, serviceLabel: string, provinceLabel: string, total: number) {
+function buildSchema(
+  service: string, province: string,
+  serviceLabel: string, provinceLabel: string,
+  agents: typeof AGENTS, locs: typeof LOCATIONS,
+) {
+  const geo = PROVINCE_GEO[province];
+  const total = agents.length + locs.length;
+  const allItems = [
+    ...agents.slice(0, 8).map((a, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `https://pro.thodia.so/agent/${a.slug}`,
+      name: a.name,
+    })),
+    ...locs.slice(0, 4).map((l, i) => ({
+      "@type": "ListItem",
+      position: agents.slice(0, 8).length + i + 1,
+      url: `https://pro.thodia.so/locations/${l.province}/${l.phuong}/${l.slug}`,
+      name: l.name,
+    })),
+  ];
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -44,6 +77,19 @@ function buildSchema(service: string, province: string, serviceLabel: string, pr
         name: `Đại lý ${serviceLabel} uy tín tại ${provinceLabel}`,
         url: `https://pro.thodia.so/${service}/${province}`,
         numberOfItems: total,
+        ...(geo && {
+          spatialCoverage: {
+            "@type": "AdministrativeArea",
+            name: provinceLabel,
+            geo: { "@type": "GeoCoordinates", latitude: geo.lat, longitude: geo.lng },
+          },
+        }),
+        mainEntity: {
+          "@type": "ItemList",
+          "@id": `https://pro.thodia.so/${service}/${province}#list`,
+          numberOfItems: total,
+          itemListElement: allItems,
+        },
       },
       {
         "@type": "BreadcrumbList",
@@ -69,8 +115,7 @@ export default async function ServiceProvincePage({ params }: PageProps) {
   const provinceLocs = getLocationsByProvince(province).filter((l) => l.category === service);
   const allLocs = provinceLocs.length ? provinceLocs : LOCATIONS.filter((l) => l.category === service);
 
-  const totalItems = allServiceAgents.length + allLocs.length;
-  const schema = buildSchema(service, province, serviceLabel, provinceLabel, totalItems);
+  const schema = buildSchema(service, province, serviceLabel, provinceLabel, allServiceAgents, allLocs);
 
   // Geo clusters cho province này
   const clusters = GEO_CLUSTERS.filter((c) => c.province === province);
@@ -135,39 +180,9 @@ export default async function ServiceProvincePage({ params }: PageProps) {
 
         <Separator className="mb-5" />
 
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-2 mb-5" role="search" aria-label="Bộ lọc">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <Input placeholder="Tìm tên, địa chỉ..." className="pl-9 h-8 text-sm" id="listing-search" aria-label="Tìm kiếm" />
-          </div>
-          <div>
-            <Select>
-              <SelectTrigger className="w-full sm:w-36 h-8 text-sm" aria-label="Lọc đánh giá">
-                <SelectValue placeholder="Đánh giá" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tất cả</SelectItem>
-                <SelectItem value="4.5">4.5+ sao</SelectItem>
-                <SelectItem value="4">4+ sao</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Select>
-              <SelectTrigger className="w-full sm:w-36 h-8 text-sm" aria-label="Lọc loại">
-                <SelectValue placeholder="Loại" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tất cả</SelectItem>
-                <SelectItem value="agent">Cá nhân</SelectItem>
-                <SelectItem value="location">Văn phòng / Showroom</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <Button variant="outline" size="icon" className="h-8 w-8 shrink-0" aria-label="Bộ lọc nâng cao">
-            <SlidersHorizontal className="h-3.5 w-3.5" />
-          </Button>
+        {/* Filters — isolated "use client" island, không ảnh hưởng Server Component tree */}
+        <div className="mb-5">
+          <FilterBar />
         </div>
 
         {/* ── Locations / Showrooms ─────────────────────────────────────── */}
@@ -227,7 +242,7 @@ export default async function ServiceProvincePage({ params }: PageProps) {
               <h2 className="text-sm font-semibold">Đại lý cá nhân</h2>
             </div>
             <div className="space-y-2">
-              {allServiceAgents.map((agent, idx) => (
+              {allServiceAgents.map((agent) => (
                 <Link key={agent.slug} href={`/agent/${agent.slug}`}>
                   <Card className="hover:border-primary/40 transition-colors cursor-pointer">
                     <CardContent className="p-3 flex items-center gap-3">
@@ -275,10 +290,10 @@ export default async function ServiceProvincePage({ params }: PageProps) {
 
         {/* Pagination */}
         <div className="flex justify-center gap-1.5" aria-label="Phân trang">
-          <Button variant="outline" size="sm" disabled className="h-7 px-2.5 text-xs">← Trước</Button>
-          <Button variant="default" size="sm" aria-current="page" className="h-7 px-2.5 text-xs">1</Button>
-          <Button variant="outline" size="sm" className="h-7 px-2.5 text-xs">2</Button>
-          <Button variant="outline" size="sm" className="h-7 px-2.5 text-xs">Sau →</Button>
+          <button disabled className="h-7 px-2.5 text-xs inline-flex items-center rounded-md border border-border bg-background opacity-50 cursor-not-allowed">← Trước</button>
+          <button aria-current="page" className="h-7 px-2.5 text-xs inline-flex items-center rounded-md bg-primary text-primary-foreground font-medium">1</button>
+          <button className="h-7 px-2.5 text-xs inline-flex items-center rounded-md border border-border bg-background hover:bg-muted transition-colors">2</button>
+          <button className="h-7 px-2.5 text-xs inline-flex items-center rounded-md border border-border bg-background hover:bg-muted transition-colors">Sau →</button>
         </div>
       </div>
     </>

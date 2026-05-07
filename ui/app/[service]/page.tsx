@@ -16,10 +16,18 @@ import {
   AGENTS, LOCATIONS, PROVINCES, SERVICES,
   getServiceLabel, getAgentsByService,
   getProvinceLabel, getAgentsByProvince, getLocationsByProvince,
+  PROVINCE_GEO,
 } from "@/lib/mock-data";
 
 interface PageProps {
   params: Promise<{ service: string }>;
+}
+
+// ─── Static params ────────────────────────────────────────────────────────────
+export function generateStaticParams() {
+  const serviceParams = Object.keys(SERVICES).map((s) => ({ service: s }));
+  const provinceParams = Object.keys(PROVINCES).map((p) => ({ service: p }));
+  return [...serviceParams, ...provinceParams];
 }
 
 // ─── Helpers: Province detection ──────────────────────────────────────────────
@@ -59,7 +67,25 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 // ─── Schema builders ──────────────────────────────────────────────────────────
-function buildServiceSchema(service: string, serviceLabel: string, total: number) {
+function buildServiceSchema(
+  service: string, serviceLabel: string,
+  agents: typeof AGENTS, locs: typeof LOCATIONS,
+) {
+  const allItems = [
+    ...agents.slice(0, 8).map((a, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `https://pro.thodia.so/agent/${a.slug}`,
+      name: a.name,
+    })),
+    ...locs.slice(0, 4).map((l, i) => ({
+      "@type": "ListItem",
+      position: agents.slice(0, 8).length + i + 1,
+      url: `https://pro.thodia.so/locations/${l.province}/${l.phuong}/${l.slug}`,
+      name: l.name,
+    })),
+  ];
+  const total = agents.length + locs.length;
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -70,6 +96,12 @@ function buildServiceSchema(service: string, serviceLabel: string, total: number
         description: `Danh sách ${total} đại lý ${serviceLabel} đã xác minh trên toàn quốc`,
         url: `https://pro.thodia.so/${service}`,
         numberOfItems: total,
+        mainEntity: {
+          "@type": "ItemList",
+          "@id": `https://pro.thodia.so/${service}#list`,
+          numberOfItems: total,
+          itemListElement: allItems,
+        },
       },
       {
         "@type": "BreadcrumbList",
@@ -82,7 +114,26 @@ function buildServiceSchema(service: string, serviceLabel: string, total: number
   };
 }
 
-function buildProvinceSchema(provinceSlug: string, provinceLabel: string, total: number) {
+function buildProvinceSchema(
+  provinceSlug: string, provinceLabel: string,
+  agents: typeof AGENTS, locs: typeof LOCATIONS,
+) {
+  const geo = PROVINCE_GEO[provinceSlug];
+  const allItems = [
+    ...agents.slice(0, 8).map((a, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `https://pro.thodia.so/agent/${a.slug}`,
+      name: a.name,
+    })),
+    ...locs.slice(0, 4).map((l, i) => ({
+      "@type": "ListItem",
+      position: agents.slice(0, 8).length + i + 1,
+      url: `https://pro.thodia.so/locations/${l.province}/${l.phuong}/${l.slug}`,
+      name: l.name,
+    })),
+  ];
+  const total = agents.length + locs.length;
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -93,6 +144,19 @@ function buildProvinceSchema(provinceSlug: string, provinceLabel: string, total:
         description: `Danh sách ${total} đại lý đã xác minh tại ${provinceLabel}`,
         url: `https://pro.thodia.so/${provinceSlug}`,
         numberOfItems: total,
+        ...(geo && {
+          spatialCoverage: {
+            "@type": "AdministrativeArea",
+            name: provinceLabel,
+            geo: { "@type": "GeoCoordinates", latitude: geo.lat, longitude: geo.lng },
+          },
+        }),
+        mainEntity: {
+          "@type": "ItemList",
+          "@id": `https://pro.thodia.so/${provinceSlug}#list`,
+          numberOfItems: total,
+          itemListElement: allItems,
+        },
       },
       {
         "@type": "BreadcrumbList",
@@ -360,8 +424,7 @@ export default async function DynamicSlugPage({ params }: PageProps) {
     const agents = getAgentsByProvince(slug);
     const locations = getLocationsByProvince(slug);
     const services = getServicesForProvince(slug);
-    const total = agents.length + locations.length;
-    const schema = buildProvinceSchema(slug, provinceLabel, total);
+    const schema = buildProvinceSchema(slug, provinceLabel, agents, locations);
 
     return (
       <ProvinceListingPage
@@ -379,11 +442,12 @@ export default async function DynamicSlugPage({ params }: PageProps) {
   if (!isService(slug)) notFound();
 
   const serviceLabel = getServiceLabel(slug);
-  const featuredAgents = getAgentsByService(slug).slice(0, 4);
-  const featuredLocs = LOCATIONS.filter((l) => l.category === slug).slice(0, 3);
+  const allAgents = getAgentsByService(slug);
+  const allServiceLocs = LOCATIONS.filter((l) => l.category === slug);
+  const featuredAgents = allAgents.slice(0, 4);
+  const featuredLocs = allServiceLocs.slice(0, 3);
   const provinces = getProvincesForService(slug);
-  const total = featuredAgents.length + featuredLocs.length;
-  const schema = buildServiceSchema(slug, serviceLabel, total);
+  const schema = buildServiceSchema(slug, serviceLabel, allAgents, allServiceLocs);
 
   return (
     <>

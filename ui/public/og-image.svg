@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="Pro.Thodia.so Open Graph image">
+  <title>Pro.Thodia.so — Danh bạ Đại lý Kinh doanh Việt Nam</title>
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#0f172a"/>
+  <!-- Gradient overlay -->
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#grad)"/>
+
+  <!-- Map pin icon (large) -->
+  <g transform="translate(100, 180)" fill="#6366f1">
+    <path d="M55 0C38.43 0 25 13.43 25 30c0 23 30 64 30 64s30-41 30-64c0-16.57-13.43-30-30-30zm0 42c-6.63 0-12-5.37-12-12s5.37-12 12-12 12 5.37 12 12-5.37 12-12 12z"/>
+  </g>
+
+  <!-- Main title -->
+  <text x="200" y="260" font-family="Inter, system-ui, sans-serif" font-weight="700" font-size="72" fill="#6366f1">Pro</text>
+  <text x="330" y="260" font-family="Inter, system-ui, sans-serif" font-weight="400" font-size="72" fill="#94a3b8">.Thodia.so</text>
+
+  <!-- Tagline -->
+  <text x="200" y="320" font-family="Inter, system-ui, sans-serif" font-weight="400" font-size="32" fill="#64748b">Danh bạ Đại lý BĐS · Xe cộ · Bảo hiểm Việt Nam</text>
+
+  <!-- Stats bar -->
+  <rect x="200" y="370" width="800" height="1" fill="#334155"/>
+
+  <!-- Stats -->
+  <text x="200" y="420" font-family="Inter, system-ui, sans-serif" font-weight="700" font-size="40" fill="#f1f5f9">1,847</text>
+  <text x="200" y="458" font-family="Inter, system-ui, sans-serif" font-size="20" fill="#64748b">Đại lý đăng ký</text>
+
+  <text x="500" y="420" font-family="Inter, system-ui, sans-serif" font-weight="700" font-size="40" fill="#f1f5f9">63</text>
+  <text x="500" y="458" font-family="Inter, system-ui, sans-serif" font-size="20" fill="#64748b">Tỉnh/Thành phố</text>
+
+  <text x="750" y="420" font-family="Inter, system-ui, sans-serif" font-weight="700" font-size="40" fill="#f1f5f9">98%</text>
+  <text x="750" y="458" font-family="Inter, system-ui, sans-serif" font-size="20" fill="#64748b">Đã xác minh</text>
+
+  <!-- Domain badge -->
+  <rect x="200" y="510" width="220" height="44" rx="8" fill="#6366f1" fill-opacity="0.2"/>
+  <rect x="200" y="510" width="220" height="44" rx="8" stroke="#6366f1" stroke-width="1" fill="none"/>
+  <text x="310" y="538" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="18" fill="#818cf8">pro.thodia.so</text>
+</svg>

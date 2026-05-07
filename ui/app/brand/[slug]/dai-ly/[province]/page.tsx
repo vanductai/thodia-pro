@@ -29,6 +29,62 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
+function buildBrandDealerProvinceSchema(
+  brandSlug: string,
+  brandName: string,
+  province: string,
+  provinceLabel: string,
+  locations: typeof LOCATIONS,
+  agents: typeof AGENTS,
+) {
+  const totalItems = locations.length + agents.length;
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        "@id": `https://pro.thodia.so/brand/${brandSlug}/dai-ly/${province}#page`,
+        name: `Đại lý ${brandName} chính hãng tại ${provinceLabel}`,
+        description: `Danh sách ${totalItems} đại lý ${brandName} ủy quyền tại ${provinceLabel}. Thông tin đã xác minh.`,
+        url: `https://pro.thodia.so/brand/${brandSlug}/dai-ly/${province}`,
+        numberOfItems: totalItems,
+        about: {
+          "@type": "Organization",
+          name: brandName,
+        },
+        ...(totalItems > 0 ? {
+          mainEntity: {
+            "@type": "ItemList",
+            itemListElement: [
+              ...locations.slice(0, 5).map((loc, i) => ({
+                "@type": "ListItem",
+                position: i + 1,
+                url: `https://pro.thodia.so/locations/${loc.province}/${loc.phuong}/${loc.slug}`,
+                name: loc.name,
+              })),
+              ...agents.slice(0, 5).map((a, i) => ({
+                "@type": "ListItem",
+                position: locations.length + i + 1,
+                url: `https://pro.thodia.so/agent/${a.slug}`,
+                name: a.name,
+              })),
+            ],
+          },
+        } : {}),
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Trang chủ", item: "https://pro.thodia.so" },
+          { "@type": "ListItem", position: 2, name: "Thương hiệu", item: "https://pro.thodia.so/brand" },
+          { "@type": "ListItem", position: 3, name: brandName, item: `https://pro.thodia.so/brand/${brandSlug}` },
+          { "@type": "ListItem", position: 4, name: provinceLabel, item: `https://pro.thodia.so/brand/${brandSlug}/dai-ly/${province}` },
+        ],
+      },
+    ],
+  };
+}
+
 export default async function BrandDealerProvincePage({ params }: PageProps) {
   const { slug, province } = await params;
   const brand = BRANDS.find((b) => b.slug === slug);
@@ -48,8 +104,14 @@ export default async function BrandDealerProvincePage({ params }: PageProps) {
   const allBrandLocations = brandLocations.length ? brandLocations : LOCATIONS.filter((l) => l.primary_brand === brand.name);
   const isFiltered = brandAgents.length > 0 || brandLocations.length > 0;
 
+  const schema = buildBrandDealerProvinceSchema(
+    slug, brand.name, province, provinceLabel,
+    allBrandLocations, allBrandAgents,
+  );
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       <div className="container mx-auto max-w-5xl px-4 py-6">
         <Breadcrumb className="mb-5">
           <BreadcrumbList>

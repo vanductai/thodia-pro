@@ -8,9 +8,16 @@ export interface FAQItem {
 interface FAQAccordionProps {
   items: FAQItem[];
   schemaId?: string;
+  /**
+   * schemaEmit=true (default): component tự emit FAQPage JSON-LD — dùng cho
+   * các trang không có @graph riêng (e.g. standalone pages).
+   * schemaEmit=false: không emit — dùng khi page đã gộp FAQPage vào @graph
+   * của chính nó để tránh duplicate schema trên cùng 1 trang.
+   */
+  schemaEmit?: boolean;
 }
 
-export function FAQAccordion({ items, schemaId }: FAQAccordionProps) {
+export function FAQAccordion({ items, schemaId, schemaEmit = true }: FAQAccordionProps) {
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -23,10 +30,12 @@ export function FAQAccordion({ items, schemaId }: FAQAccordionProps) {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
+      {schemaEmit && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
       <Accordion className="w-full" id={schemaId}>
         {items.map((item, i) => (
           <AccordionItem key={i} value={`faq-${i}`}>

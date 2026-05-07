@@ -14,9 +14,17 @@ import {
 } from "@/components/ui/breadcrumb";
 import {
   MapPin, Clock, Phone, Mail, Globe, Share2,
-  CheckCircle2, ParkingCircle, Bus, Users,
+  CheckCircle2, Users,
 } from "lucide-react";
 import { LOCATIONS, AGENTS, getProvinceLabel } from "@/lib/mock-data";
+
+export function generateStaticParams() {
+  return LOCATIONS.map((loc) => ({
+    tinh: loc.province,
+    phuong: loc.phuong,
+    slug: loc.slug,
+  }));
+}
 
 interface PageProps {
   params: Promise<{ tinh: string; phuong: string; slug: string }>;
@@ -30,7 +38,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${loc.name} — Đại lý ${loc.primary_brand ?? ""} tại ${loc.ward_label}, ${provinceLabel}`,
     description: `${loc.name} tại ${loc.address}. ⭐ ${loc.rating}/5 (${loc.review_count} đánh giá). ${loc.services.slice(0, 2).join(", ")}.`,
-    alternates: { canonical: `https://pro.thodia.so/${tinh}/${phuong}/${slug}` },
+    alternates: { canonical: `https://pro.thodia.so/locations/${tinh}/${phuong}/${slug}` },
     other: {
       "geo.region": tinh === "tp-ho-chi-minh" ? "VN-SG" : "VN",
       "geo.placename": `${loc.ward_label}, ${provinceLabel}`,
@@ -99,10 +107,18 @@ function buildSchema(loc: (typeof LOCATIONS)[number], tinh: string, phuong: stri
           brand: { "@type": "Brand", name: loc.primary_brand },
         } : {}),
         areaServed: loc.area_served.map((a) => ({
-          "@type": "City",
+          "@type": "AdministrativeArea",
           name: a.ward,
           description: `Trước 2025 thuộc ${a.legacy}`,
         })),
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: [
+          { "@type": "Question", name: "Địa chỉ hành chính mới là gì?", acceptedAnswer: { "@type": "Answer", text: "Theo cải cách hành chính 2025, địa chỉ nay thuộc Phường mới thay thế Quận cũ. GPS và Google Maps vẫn tìm được chính xác." } },
+          { "@type": "Question", name: "Có hỗ trợ lịch tham quan/tư vấn không?", acceptedAnswer: { "@type": "Answer", text: "Có. Liên hệ qua số điện thoại hoặc Zalo để đặt lịch, chúng tôi phục vụ 7 ngày/tuần." } },
+          { "@type": "Question", name: "Có chỗ đậu xe không?", acceptedAnswer: { "@type": "Answer", text: "Có bãi đậu xe miễn phí cho khách hàng trong giờ làm việc. Vui lòng liên hệ trước nếu cần chỗ cho xe tải/xe lớn." } },
+        ],
       },
       {
         "@type": "BreadcrumbList",
@@ -121,6 +137,7 @@ function buildSchema(loc: (typeof LOCATIONS)[number], tinh: string, phuong: stri
 const FAQ_ITEMS = [
   { question: "Địa chỉ hành chính mới là gì?", answer: "Theo cải cách hành chính 2025, địa chỉ nay thuộc Phường mới thay thế Quận cũ. GPS và Google Maps vẫn tìm được chính xác." },
   { question: "Có hỗ trợ lịch tham quan/tư vấn không?", answer: "Có. Liên hệ qua số điện thoại hoặc Zalo để đặt lịch, chúng tôi phục vụ 7 ngày/tuần." },
+  { question: "Có chỗ đậu xe không?", answer: "Có bãi đậu xe miễn phí cho khách hàng trong giờ làm việc. Vui lòng liên hệ trước nếu cần chỗ cho xe tải/xe lớn." },
 ];
 
 export default async function LocationPage({ params }: PageProps) {
@@ -264,7 +281,7 @@ export default async function LocationPage({ params }: PageProps) {
             {/* FAQ */}
             <section>
               <h2 className="text-base font-semibold mb-3">Câu hỏi thường gặp</h2>
-              <FAQAccordion items={FAQ_ITEMS} schemaId="location-faq" />
+              <FAQAccordion items={FAQ_ITEMS} schemaId="location-faq" schemaEmit={false} />
             </section>
           </div>
 
@@ -286,12 +303,34 @@ export default async function LocationPage({ params }: PageProps) {
                     <Globe className="h-3.5 w-3.5" />Google Maps
                   </a>
                 </div>
-                {/* Map placeholder */}
-                <div className="rounded-md bg-muted aspect-video flex items-center justify-center text-xs text-muted-foreground">
-                  <MapPin className="h-4 w-4 mr-1" />Google Maps Embed
-                </div>
-                {loc.lat && loc.lng && (
-                  <p className="text-xs text-muted-foreground">GPS: {loc.lat}, {loc.lng}</p>
+                {/* Google Maps embed */}
+                {loc.lat && loc.lng ? (
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block rounded-md overflow-hidden border hover:opacity-90 transition-opacity"
+                    aria-label={`Xem ${loc.name} trên Google Maps`}
+                  >
+                    <iframe
+                      title={`Bản đồ ${loc.name}`}
+                      width="100%"
+                      height="180"
+                      style={{ border: 0 }}
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      src={`https://maps.google.com/maps?q=${loc.lat},${loc.lng}&z=16&output=embed`}
+                    />
+                  </a>
+                ) : (
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.address)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-1.5 rounded-md bg-muted aspect-video text-xs text-muted-foreground hover:bg-muted/70 transition-colors"
+                  >
+                    <MapPin className="h-4 w-4" />Xem trên Google Maps
+                  </a>
                 )}
               </CardContent>
             </Card>

@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppSidebar, MobileTopBar } from "@/components/layout/app-sidebar";
 import { SiteFooter } from "@/components/layout/site-footer";
 
@@ -12,11 +11,8 @@ const inter = Inter({
   display: "swap",
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-  display: "swap",
-});
+// JetBrains Mono chỉ load khi cần (code blocks) — xóa khỏi global load
+// để giảm font request không cần thiết cho SEO performance
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://pro.thodia.so"),
@@ -36,14 +32,19 @@ export const metadata: Metadata = {
     siteName: "Pro.Thodia.so",
     title: "Pro.Thodia.so - Danh bạ Đại lý Kinh doanh Việt Nam",
     description: "Tìm kiếm đại lý BĐS, xe cộ, bảo hiểm uy tín tại Việt Nam",
-    images: [{ url: "/og-image.jpg", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.svg", width: 1200, height: 630, alt: "Pro.Thodia.so — Danh bạ Đại lý Kinh doanh Việt Nam" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pro.Thodia.so",
-    description: "Danh bạ đại lý kinh doanh Việt Nam",
+    title: "Pro.Thodia.so — Danh bạ Đại lý Kinh doanh Việt Nam",
+    description: "Tìm đại lý BĐS, xe cộ, bảo hiểm uy tín tại Việt Nam. 1,847+ đại lý đã xác minh.",
+    images: ["/og-image.svg"],
   },
   robots: { index: true, follow: true },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -65,12 +66,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       "@type": "Organization",
       name: "Pro.Thodia.so",
       url: "https://pro.thodia.so",
-      logo: { "@type": "ImageObject", url: "https://pro.thodia.so/logo.png" },
+      logo: { "@type": "ImageObject", url: "https://pro.thodia.so/logo.svg" },
     },
   };
 
   return (
-    <html lang="vi" suppressHydrationWarning className={`${inter.variable} ${jetbrainsMono.variable}`}>
+    <html lang="vi" suppressHydrationWarning className={inter.variable}>
       <head>
         <script
           type="application/ld+json"
@@ -84,7 +85,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           enableSystem
           disableTransitionOnChange
         >
-          <TooltipProvider>
             {/* Mobile topbar — fixed, full viewport width, ngoài max-w shell */}
             <MobileTopBar />
 
@@ -97,7 +97,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <SiteFooter />
               </div>
             </div>
-          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>

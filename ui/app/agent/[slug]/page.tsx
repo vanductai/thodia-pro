@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,61 +12,74 @@ import {
   Breadcrumb, BreadcrumbItem, BreadcrumbLink,
   BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { MapPin, Clock, Award, Building2, Globe, Share2, Phone, Mail, CheckCircle2, Car } from "lucide-react";
+import {
+  MapPin, Clock, Award, Globe, Share2, Phone, Mail,
+  CheckCircle2, Car, Building2,
+} from "lucide-react";
+import { AGENTS, SERVICES, getProvinceLabel } from "@/lib/mock-data";
 
-// ─── Mock data (sẽ thay bằng fetch từ DB) ───────────────────────────────────
+// ─── Static params ────────────────────────────────────────────────────────────
 
-const AGENT_LOCATION_BASED = {
-  agent_type: "location-based" as const,
-  name: "Nguyễn Văn Minh",
-  slug: "nguyen-van-minh-bds-phuong-tan-thuan-tay",
-  title: "Môi giới Bất động sản Chuyên nghiệp",
-  category: "bds",
-  photo: "/agents/nguyen-van-minh.jpg",
-  rating: 4.8,
-  review_count: 47,
-  years_experience: 8,
-  phone: "+84 901 234 567",
-  email: "minh.bds@example.com",
-  license_number: "CC-BĐS-HCM-2021-012345",
-  license_issuer: "Sở Xây dựng TP.HCM",
-  office_address: "123 Nguyễn Văn Linh, Phường Tân Thuận Tây, TP. Hồ Chí Minh",
-  ward: "Phường Tân Thuận Tây",
-  legacy_district: "Quận 7",
-  city: "TP. Hồ Chí Minh",
-  working_hours: "Thứ 2 – Thứ 7: 08:00 – 18:00",
-  gbp_url: "https://g.co/kgs/abc123",
-  facebook_url: "https://facebook.com/nguyen.van.minh.bds",
-  authorized_brands: ["Vinhomes", "Novaland"],
-  brand_tier: "gold" as const,
-  bio: "Nguyễn Văn Minh là môi giới bất động sản chuyên nghiệp với hơn 8 năm kinh nghiệm trong lĩnh vực mua bán và cho thuê căn hộ, đất nền tại khu vực Phường Tân Thuận Tây (khu vực Quận 7 cũ) và các phường lân cận thuộc TP. Hồ Chí Minh. Anh Minh chuyên tư vấn phân khúc căn hộ trung-cao cấp dọc trục Nguyễn Văn Linh, có kinh nghiệm đàm phán và hỗ trợ pháp lý toàn trình. Phong cách làm việc chuyên nghiệp, minh bạch, đặt lợi ích khách hàng lên hàng đầu. Khu vực phục vụ chính: Phường Tân Thuận Tây, Phường Tân Thuận Đông, Phường Phú Thuận (khu vực Quận 7 cũ), TP. Hồ Chí Minh.",
-  services: [
-    { icon: "🏠", name: "Mua bán căn hộ", desc: "Tư vấn & môi giới mua bán căn hộ chung cư" },
-    { icon: "🏘", name: "Cho thuê BĐS", desc: "Tìm kiếm và cho thuê nhà, văn phòng" },
-    { icon: "📋", name: "Tư vấn pháp lý", desc: "Hỗ trợ thủ tục pháp lý, sang tên" },
-    { icon: "💰", name: "Định giá BĐS", desc: "Thẩm định giá trị bất động sản" },
-  ],
-  portfolio: [
-    { type: "Căn hộ", area: "P. Tân Thuận Tây", result: "Bán thành công, 3.2 tỷ", year: 2024 },
-    { type: "Đất nền", area: "P. Phú Thuận", result: "Bán thành công, 5.8 tỷ", year: 2024 },
-    { type: "Căn hộ cho thuê", area: "P. Tân Thuận Đông", result: "Cho thuê 18tr/tháng", year: 2023 },
-  ],
-  reviews: [
-    { author: "Trần Thị Hoa", rating: 5, date: "2024-03-15", text: "Anh Minh tư vấn rất nhiệt tình, hỗ trợ pháp lý toàn trình. Mình mua được căn hộ ưng ý, giá tốt." },
-    { author: "Lê Văn Đức", rating: 5, date: "2024-01-20", text: "Chuyên nghiệp, phản hồi nhanh, am hiểu thị trường Quận 7 rất sâu." },
-    { author: "Nguyễn Phương Anh", rating: 4, date: "2023-11-08", text: "Tư vấn tốt, thủ tục nhanh. Sẽ giới thiệu cho bạn bè." },
-  ],
-  area_served: ["Phường Tân Thuận Tây", "Phường Tân Thuận Đông", "Phường Phú Thuận"],
-  faq: [
-    { question: "Anh Minh có kinh nghiệm ở khu vực nào?", answer: "Anh Minh chuyên về khu vực Phường Tân Thuận Tây, Phường Tân Thuận Đông và Phường Phú Thuận (khu vực Quận 7 cũ), TP.HCM với 8 năm kinh nghiệm." },
-    { question: "Chi phí môi giới là bao nhiêu?", answer: "Chi phí môi giới thỏa thuận theo giao dịch, thông thường 1-2% giá trị hợp đồng. Tư vấn miễn phí lần đầu." },
-    { question: "Có hỗ trợ vay ngân hàng không?", answer: "Có. Anh Minh hợp tác với các ngân hàng uy tín để hỗ trợ khách hàng vay mua BĐS với lãi suất tốt nhất." },
-  ],
-};
+export function generateStaticParams() {
+  return AGENTS.map((a) => ({ slug: a.slug }));
+}
 
-// ─── Schema Builder ──────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function buildPersonSchema(agent: typeof AGENT_LOCATION_BASED) {
+function getGeoRegion(province: string): string {
+  const map: Record<string, string> = {
+    "tp-ho-chi-minh": "VN-SG",
+    "ha-noi": "VN-HN",
+    "da-nang": "VN-DN",
+    "binh-duong": "VN-57",
+    "dong-nai": "VN-39",
+    "can-tho": "VN-CT",
+  };
+  return map[province] ?? "VN";
+}
+
+function getCategoryLabel(category: string): string {
+  return SERVICES[category as keyof typeof SERVICES]?.label ?? category;
+}
+
+// ─── Metadata ─────────────────────────────────────────────────────────────────
+
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const agent = AGENTS.find((a) => a.slug === slug);
+  if (!agent) return { title: "Không tìm thấy" };
+
+  const provinceLabel = getProvinceLabel(agent.province);
+  const locationStr = agent.ward_label
+    ? `${agent.ward_label} (${agent.legacy_district}), ${provinceLabel}`
+    : provinceLabel;
+
+  return {
+    title: `${agent.name} — ${agent.title} tại ${locationStr}`,
+    description: `${agent.name} — ${agent.years_experience} năm kinh nghiệm ${getCategoryLabel(agent.category)}. ⭐ ${agent.rating}/5 (${agent.review_count} đánh giá). Đã xác minh. ☎ ${agent.phone.replace("+84", "0")}`,
+    openGraph: { type: "profile" },
+    alternates: { canonical: `https://pro.thodia.so/agent/${agent.slug}` },
+    other: {
+      "geo.region": getGeoRegion(agent.province),
+      "geo.placename": agent.ward_label ? `${agent.ward_label}, ${provinceLabel}` : provinceLabel,
+      ...(agent.lat && agent.lng ? {
+        "geo.position": `${agent.lat};${agent.lng}`,
+        ICBM: `${agent.lat}, ${agent.lng}`,
+      } : {}),
+    },
+  };
+}
+
+// ─── Schema Builder ───────────────────────────────────────────────────────────
+
+function buildPersonSchema(agent: (typeof AGENTS)[number]) {
+  const provinceLabel = getProvinceLabel(agent.province);
+  const categoryLabel = getCategoryLabel(agent.category);
+
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -79,48 +93,50 @@ function buildPersonSchema(agent: typeof AGENT_LOCATION_BASED) {
         telephone: agent.phone,
         email: agent.email,
         url: `https://pro.thodia.so/agent/${agent.slug}`,
-        // Address (location-based agent có văn phòng — F3)
-        address: {
-          "@type": "PostalAddress",
-          streetAddress: "123 Nguyễn Hữu Thọ",
-          addressLocality: agent.ward,
-          addressRegion: agent.city,
-          postalCode: "700000",
-          addressCountry: "VN",
-        },
-        // F10: hasOccupation chuẩn hơn serviceType
+        ...(agent.office_address ? {
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: agent.office_address.split(",")[0].trim(),
+            addressLocality: agent.ward_label ?? provinceLabel,
+            addressRegion: provinceLabel,
+            addressCountry: "VN",
+          },
+        } : {}),
+        ...(agent.lat && agent.lng ? {
+          geo: { "@type": "GeoCoordinates", latitude: agent.lat, longitude: agent.lng },
+        } : {}),
         hasOccupation: {
           "@type": "Occupation",
           name: agent.title,
-          occupationLocation: { "@type": "City", name: agent.city },
-          skills: agent.services.map((s) => s.name).join(", "),
+          occupationLocation: { "@type": "City", name: provinceLabel },
+          skills: agent.services.join(", "),
         },
-        worksFor: agent.authorized_brands.length > 0 ? {
-          "@type": "Organization",
-          name: agent.authorized_brands[0],
-        } : undefined,
-        areaServed: [
-          ...agent.area_served.map((w) => ({ "@type": "City", name: `${w}, ${agent.city}` })),
-          { "@type": "City", name: `Khu vực ${agent.legacy_district}, ${agent.city}`, description: "Địa danh hành chính cũ trước 2025" },
-        ],
-        // F8: knowsAbout dùng Thing objects
+        ...(agent.authorized_brands.length > 0 ? {
+          worksFor: { "@type": "Organization", name: agent.authorized_brands[0] },
+          brand: agent.authorized_brands.map((b) => ({ "@type": "Brand", name: b })),
+        } : {}),
+        areaServed: agent.ward_label
+          ? [
+              { "@type": "AdministrativeArea", name: agent.ward_label },
+              { "@type": "City", name: provinceLabel },
+            ]
+          : [{ "@type": "City", name: provinceLabel }],
         knowsAbout: [
-          { "@type": "Thing", name: "Bất động sản" },
-          { "@type": "Thing", name: "Căn hộ chung cư" },
-          { "@type": "Thing", name: "Đất nền" },
-          { "@type": "Thing", name: "Định giá BĐS" },
+          { "@type": "Thing", name: categoryLabel },
+          ...agent.services.map((s) => ({ "@type": "Thing", name: s })),
         ],
-        // F7: hasCredential có đủ name field
-        hasCredential: {
-          "@type": "EducationalOccupationalCredential",
-          name: "Chứng chỉ hành nghề môi giới BĐS",
-          credentialCategory: "Professional License",
-          identifier: agent.license_number,
-          recognizedBy: { "@type": "Organization", name: agent.license_issuer },
-        },
-        brand: agent.authorized_brands.map((b) => ({ "@type": "Brand", name: b })),
+        ...(agent.license ? {
+          hasCredential: {
+            "@type": "EducationalOccupationalCredential",
+            name: `Chứng chỉ hành nghề ${categoryLabel}`,
+            credentialCategory: "Professional License",
+            identifier: agent.license,
+            ...(agent.license_issuer ? {
+              recognizedBy: { "@type": "Organization", name: agent.license_issuer },
+            } : {}),
+          },
+        } : {}),
         sameAs: [agent.gbp_url, agent.facebook_url].filter(Boolean),
-        // F5 + F6: AggregateRating + Review trong Person schema
         aggregateRating: {
           "@type": "AggregateRating",
           ratingValue: String(agent.rating),
@@ -142,11 +158,19 @@ function buildPersonSchema(agent: typeof AGENT_LOCATION_BASED) {
         })),
       },
       {
+        "@type": "FAQPage",
+        mainEntity: agent.faq.map((f) => ({
+          "@type": "Question",
+          name: f.question,
+          acceptedAnswer: { "@type": "Answer", text: f.answer },
+        })),
+      },
+      {
         "@type": "BreadcrumbList",
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Trang chủ", item: "https://pro.thodia.so" },
-          { "@type": "ListItem", position: 2, name: "Đại lý BĐS", item: "https://pro.thodia.so/bds" },
-          { "@type": "ListItem", position: 3, name: "TP. Hồ Chí Minh", item: "https://pro.thodia.so/bds/tp-ho-chi-minh" },
+          { "@type": "ListItem", position: 2, name: categoryLabel, item: `https://pro.thodia.so/${agent.category}` },
+          { "@type": "ListItem", position: 3, name: provinceLabel, item: `https://pro.thodia.so/${agent.category}/${agent.province}` },
           { "@type": "ListItem", position: 4, name: agent.name, item: `https://pro.thodia.so/agent/${agent.slug}` },
         ],
       },
@@ -154,25 +178,16 @@ function buildPersonSchema(agent: typeof AGENT_LOCATION_BASED) {
   };
 }
 
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
-// ─── Page ────────────────────────────────────────────────────────────────────
+export default async function AgentSlugPage({ params }: PageProps) {
+  const { slug } = await params;
+  const agent = AGENTS.find((a) => a.slug === slug);
+  if (!agent) notFound();
 
-export const metadata: Metadata = {
-  title: "Nguyễn Văn Minh - Môi giới BĐS Phường Tân Thuận Tây TP.HCM",
-  description: "Nguyễn Văn Minh — 8 năm môi giới BĐS căn hộ & đất nền tại Phường Tân Thuận Tây (Quận 7), TP.HCM. Đã xác minh. ☎ 0901 234 567 — Zalo sẵn sàng.",
-  openGraph: { type: "profile" },
-  alternates: { canonical: "https://pro.thodia.so/agent/nguyen-van-minh-bds-phuong-tan-thuan-tay" },
-  other: {
-    "geo.region": "VN-SG",
-    "geo.placename": "Phường Tân Thuận Tây, TP. Hồ Chí Minh",
-    "geo.position": "10.7285416;106.7178903",
-    ICBM: "10.7285416, 106.7178903",
-  },
-};
-
-export default function AgentLocationBasedPage() {
-  const agent = AGENT_LOCATION_BASED;
   const schema = buildPersonSchema(agent);
+  const provinceLabel = getProvinceLabel(agent.province);
+  const categoryLabel = getCategoryLabel(agent.category);
 
   return (
     <>
@@ -184,29 +199,34 @@ export default function AgentLocationBasedPage() {
           <BreadcrumbList>
             <BreadcrumbItem><BreadcrumbLink href="/">Trang chủ</BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem><BreadcrumbLink href="/bds">Đại lý BĐS</BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbItem><BreadcrumbLink href={`/${agent.category}`}>{categoryLabel}</BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem><BreadcrumbLink href="/bds/tp-ho-chi-minh">Đại lý BĐS TP.HCM</BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbItem>
+              <BreadcrumbLink href={`/${agent.category}/${agent.province}`}>
+                {categoryLabel} {provinceLabel}
+              </BreadcrumbLink>
+            </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem><BreadcrumbPage>{agent.name}</BreadcrumbPage></BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          {/* Left column */}
+          {/* ── Left column ──────────────────────────────────────────────── */}
           <div className="lg:col-span-2 space-y-8">
 
             {/* Hero */}
             <section className="flex flex-col sm:flex-row gap-6 items-start">
               <Avatar className="h-24 w-24 sm:h-32 sm:w-32 ring-4 ring-primary/20 flex-shrink-0">
                 <AvatarImage src={agent.photo} alt={`Ảnh đại diện ${agent.name}`} />
-                <AvatarFallback className="text-2xl font-bold">NM</AvatarFallback>
+                <AvatarFallback className="text-2xl font-bold">{agent.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="space-y-3">
                 <div className="flex flex-wrap gap-2 items-center">
                   <BadgeVerified />
-                  <BadgeBrandTier tier={agent.brand_tier} />
-                  <Badge variant="secondary">BĐS</Badge>
+                  {agent.brand_tier && <BadgeBrandTier tier={agent.brand_tier} />}
+                  {agent.agent_type === "freelance" && <BadgeFreelance />}
+                  <Badge variant="secondary">{categoryLabel}</Badge>
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{agent.name}</h1>
                 <p className="text-muted-foreground">{agent.title}</p>
@@ -215,7 +235,7 @@ export default function AgentLocationBasedPage() {
               </div>
             </section>
 
-            {/* Quick info bar */}
+            {/* Quick info */}
             <Card>
               <CardContent className="p-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
@@ -223,7 +243,7 @@ export default function AgentLocationBasedPage() {
                     <Phone className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <div>
                       <span className="font-medium">Điện thoại</span>
-                      <p className="text-muted-foreground"><a href={`tel:${agent.phone}`}>{agent.phone}</a></p>
+                      <p><a href={`tel:${agent.phone}`} className="text-primary hover:underline">{agent.phone}</a></p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
@@ -233,13 +253,18 @@ export default function AgentLocationBasedPage() {
                       <p className="text-muted-foreground">{agent.working_hours}</p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                    <div>
-                      <span className="font-medium">Văn phòng</span>
-                      <p className="text-muted-foreground">{agent.office_address}</p>
+                  {agent.office_address && (
+                    <div className="flex items-start gap-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                      <div>
+                        <span className="font-medium">Văn phòng</span>
+                        <address className="not-italic text-muted-foreground">{agent.office_address}</address>
+                        {agent.legacy_district && (
+                          <p className="text-xs text-muted-foreground opacity-70">(Trước 2025: {agent.legacy_district})</p>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
                   <div className="flex items-start gap-2">
                     <Award className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                     <div>
@@ -255,27 +280,36 @@ export default function AgentLocationBasedPage() {
             <section>
               <h2 className="text-xl font-semibold mb-3">Giới thiệu</h2>
               <p className="text-muted-foreground leading-relaxed">{agent.bio}</p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground bg-muted px-3 py-1.5 rounded-md">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                  Chứng chỉ: {agent.license_number}
+              {(agent.license || agent.authorized_brands.length > 0) && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {agent.license && (
+                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground bg-muted px-3 py-1.5 rounded-md">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                      Chứng chỉ: {agent.license}
+                    </div>
+                  )}
+                  {agent.license_issuer && (
+                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground bg-muted px-3 py-1.5 rounded-md">
+                      <Building2 className="h-4 w-4 text-blue-500" />
+                      Cấp bởi: {agent.license_issuer}
+                    </div>
+                  )}
+                  {agent.authorized_brands.length > 0 && (
+                    <div className="flex flex-wrap gap-2 w-full mt-1">
+                      {agent.authorized_brands.map((b) => (
+                        <Badge key={b} variant="outline" className="gap-1">
+                          <Car className="h-3 w-3" />{b}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground bg-muted px-3 py-1.5 rounded-md">
-                  <Building2 className="h-4 w-4 text-blue-500" />
-                  Cấp bởi: {agent.license_issuer}
-                </div>
-              </div>
-              {/* Brand badges */}
-              {agent.authorized_brands.length > 0 && (
-                <div className="mt-4">
-                  <p className="text-sm font-medium mb-2">Thương hiệu ủy quyền:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {agent.authorized_brands.map((b) => (
-                      <Badge key={b} variant="outline" className="gap-1">
-                        <Car className="h-3 w-3" />{b}
-                      </Badge>
-                    ))}
-                  </div>
+              )}
+              {agent.achievements.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {agent.achievements.map((a) => (
+                    <Badge key={a} variant="secondary" className="text-xs">{a}</Badge>
+                  ))}
                 </div>
               )}
             </section>
@@ -285,37 +319,11 @@ export default function AgentLocationBasedPage() {
             {/* Services */}
             <section>
               <h2 className="text-xl font-semibold mb-4">Dịch vụ cung cấp</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {agent.services.map((s) => (
-                  <Card key={s.name} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-4 flex items-start gap-3">
-                      <span className="text-2xl">{s.icon}</span>
-                      <div>
-                        <p className="font-medium text-sm">{s.name}</p>
-                        <p className="text-xs text-muted-foreground">{s.desc}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </section>
-
-            <Separator />
-
-            {/* Portfolio */}
-            <section>
-              <h2 className="text-xl font-semibold mb-4">Giao dịch tiêu biểu</h2>
-              <div className="space-y-3">
-                {agent.portfolio.map((p, i) => (
-                  <div key={`port-${i}`} className="flex items-center justify-between p-3 rounded-lg border bg-muted/30 text-sm">
-                    <div className="flex items-center gap-3">
-                      <Badge variant="secondary">{p.type}</Badge>
-                      <span className="text-muted-foreground">{p.area}</span>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium">{p.result}</p>
-                      <p className="text-xs text-muted-foreground">{p.year}</p>
-                    </div>
+                  <div key={s} className="flex items-center gap-2 text-sm p-3 rounded-lg border bg-muted/20">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                    <span>{s}</span>
                   </div>
                 ))}
               </div>
@@ -323,11 +331,33 @@ export default function AgentLocationBasedPage() {
 
             <Separator />
 
+            {/* Portfolio */}
+            {agent.portfolio.length > 0 && (
+              <>
+                <section>
+                  <h2 className="text-xl font-semibold mb-4">Giao dịch tiêu biểu</h2>
+                  <div className="space-y-3">
+                    {agent.portfolio.map((p, i) => (
+                      <div key={`port-${i}`} className="flex items-center justify-between p-3 rounded-lg border bg-muted/30 text-sm">
+                        <div className="flex items-center gap-3">
+                          <Badge variant="secondary">{p.type}</Badge>
+                          <span className="text-muted-foreground">{p.area}</span>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium">{p.result}</p>
+                          <p className="text-xs text-muted-foreground">{p.year}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+                <Separator />
+              </>
+            )}
+
             {/* Reviews */}
             <section>
-              <h2 className="text-xl font-semibold mb-4">
-                Đánh giá ({agent.review_count})
-              </h2>
+              <h2 className="text-xl font-semibold mb-4">Đánh giá ({agent.review_count})</h2>
               <div className="mb-4 flex items-center gap-3 p-4 rounded-lg bg-muted/50">
                 <div className="text-4xl font-bold">{agent.rating}</div>
                 <div>
@@ -344,7 +374,9 @@ export default function AgentLocationBasedPage() {
                           <p className="font-medium text-sm">{r.author}</p>
                           <RatingStars rating={r.rating} showCount={false} size="sm" />
                         </div>
-                        <time className="text-xs text-muted-foreground">{r.date}</time>
+                        <time dateTime={r.date} className="text-xs text-muted-foreground">
+                          {new Date(r.date).toLocaleDateString("vi-VN")}
+                        </time>
                       </div>
                       <p className="text-sm text-muted-foreground">{r.text}</p>
                     </CardContent>
@@ -358,30 +390,34 @@ export default function AgentLocationBasedPage() {
             {/* Area served */}
             <section>
               <h2 className="text-xl font-semibold mb-3">Khu vực phục vụ</h2>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {agent.area_served.map((a) => (
-                  <Badge key={a} variant="secondary" className="text-sm">
-                    <MapPin className="h-3 w-3 mr-1" />{a}
-                  </Badge>
-                ))}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Khu vực {agent.legacy_district} cũ — tên địa danh quen thuộc trước thay đổi hành chính 2025
-              </p>
+              {agent.ward_label ? (
+                <>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    <Badge variant="secondary" className="text-sm">
+                      <MapPin className="h-3 w-3 mr-1" />{agent.ward_label}
+                    </Badge>
+                    <Badge variant="outline" className="text-sm">{provinceLabel}</Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Khu vực {agent.legacy_district} cũ — tên địa danh quen thuộc trước thay đổi hành chính 2025
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground">Phủ sóng toàn tỉnh/thành phố: {provinceLabel}</p>
+              )}
             </section>
 
             <Separator />
 
-            {/* FAQ */}
+            {/* FAQ — schema đã gộp vào @graph ở trên, không emit riêng */}
             <section>
               <h2 className="text-xl font-semibold mb-4">Câu hỏi thường gặp</h2>
-              <FAQAccordion items={agent.faq} schemaId="agent-faq" />
+              <FAQAccordion items={agent.faq} schemaEmit={false} />
             </section>
           </div>
 
-          {/* Right sidebar */}
+          {/* ── Right sidebar ─────────────────────────────────────────────── */}
           <aside className="space-y-4">
-            {/* Contact card */}
             <Card className="sticky top-20">
               <CardHeader>
                 <CardTitle className="text-base">Liên hệ {agent.name}</CardTitle>
@@ -404,11 +440,31 @@ export default function AgentLocationBasedPage() {
                     </a>
                   )}
                 </div>
-                {/* Map embed placeholder */}
-                <div className="rounded-lg bg-muted aspect-video flex items-center justify-center text-muted-foreground text-sm">
-                  <MapPin className="h-5 w-5 mr-2" />
-                  Google Maps
-                </div>
+                {/* Map embed */}
+                {agent.lat && agent.lng ? (
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${agent.lat},${agent.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block rounded-lg overflow-hidden border hover:opacity-90 transition-opacity"
+                    aria-label={`Xem vị trí ${agent.name} trên Google Maps`}
+                  >
+                    <iframe
+                      title={`Bản đồ ${agent.name}`}
+                      width="100%"
+                      height="180"
+                      style={{ border: 0 }}
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      src={`https://maps.google.com/maps?q=${agent.lat},${agent.lng}&z=16&output=embed`}
+                    />
+                  </a>
+                ) : (
+                  <div className="rounded-lg bg-muted aspect-video flex items-center justify-center text-muted-foreground text-sm">
+                    <MapPin className="h-5 w-5 mr-2" />
+                    {agent.agent_type === "freelance" ? "Phục vụ toàn tỉnh" : "Google Maps"}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </aside>
