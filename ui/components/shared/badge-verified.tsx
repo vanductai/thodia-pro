@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, Gem, Medal, Award } from "lucide-react";
 
 interface BadgeVerifiedProps {
   label?: string;
@@ -23,11 +23,28 @@ export function BadgeFreelance() {
 }
 
 export function BadgeBrandTier({ tier }: { tier: "gold" | "silver" | "bronze" }) {
-  const styles = {
-    gold: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300 border-yellow-300",
-    silver: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300 border-gray-300",
-    bronze: "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300 border-orange-300",
+  const config = {
+    gold: {
+      className: "bg-yellow-50 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300 border-yellow-300/70",
+      icon: Gem,
+      label: "Gold Dealer",
+    },
+    silver: {
+      className: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 border-slate-300/70",
+      icon: Medal,
+      label: "Silver Dealer",
+    },
+    bronze: {
+      className: "bg-orange-50 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300 border-orange-300/70",
+      icon: Award,
+      label: "Bronze Dealer",
+    },
   };
-  const labels = { gold: "🥇 Gold Dealer", silver: "🥈 Silver Dealer", bronze: "🥉 Bronze Dealer" };
-  return <Badge variant="outline" className={styles[tier]}>{labels[tier]}</Badge>;
+  const { className, icon: Icon, label } = config[tier];
+  return (
+    <Badge variant="outline" className={className}>
+      <Icon className="mr-1 h-3 w-3" />
+      {label}
+    </Badge>
+  );
 }

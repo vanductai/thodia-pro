@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { AGENTS, LOCATIONS, BRANDS, PROVINCES, SERVICES } from "@/lib/mock-data";
+import { AGENTS, LOCATIONS, BRANDS, PROVINCES, SERVICES, GEO_CLUSTERS } from "@/lib/mock-data";
 
 const BASE_URL = "https://pro.thodia.so";
 const NOW = new Date().toISOString();
@@ -10,7 +10,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/`, lastModified: NOW, changeFrequency: "weekly", priority: 1.0 },
     { url: `${BASE_URL}/agent`, lastModified: NOW, changeFrequency: "weekly", priority: 0.8 },
     { url: `${BASE_URL}/brand`, lastModified: NOW, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${BASE_URL}/tim-kiem`, lastModified: NOW, changeFrequency: "monthly", priority: 0.3 },
     { url: `${BASE_URL}/gioi-thieu`, lastModified: NOW, changeFrequency: "yearly", priority: 0.4 },
     { url: `${BASE_URL}/chinh-sach-bao-mat`, lastModified: NOW, changeFrequency: "yearly", priority: 0.3 },
     { url: `${BASE_URL}/dieu-khoan-su-dung`, lastModified: NOW, changeFrequency: "yearly", priority: 0.3 },
@@ -42,7 +41,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }))
   );
 
-  // ── 5. Agent detail pages ─────────────────────────────────────────────────
+  // ── 5. Geo-cluster + ward pages ──────────────────────────────────────────
+  const geoPages: MetadataRoute.Sitemap = GEO_CLUSTERS.flatMap((cluster) => [
+    ...Object.keys(SERVICES).map((service) => ({
+      url: `${BASE_URL}/${service}/${cluster.province}/${cluster.slug}`,
+      lastModified: NOW,
+      changeFrequency: "weekly" as const,
+      priority: 0.75,
+    })),
+    ...cluster.wards.flatMap((ward) =>
+      Object.keys(SERVICES).map((service) => ({
+        url: `${BASE_URL}/${service}/${cluster.province}/${ward.slug}`,
+        lastModified: NOW,
+        changeFrequency: "weekly" as const,
+        priority: 0.7,
+      }))
+    ),
+  ]);
+
+  // ── 6. Agent detail pages ─────────────────────────────────────────────────
   const agentPages: MetadataRoute.Sitemap = AGENTS.map((agent) => ({
     url: `${BASE_URL}/agent/${agent.slug}`,
     lastModified: NOW,
@@ -50,7 +67,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: agent.agent_type === "location-based" ? 0.8 : 0.7,
   }));
 
-  // ── 6. Location detail pages ──────────────────────────────────────────────
+  // ── 7. Location detail pages ──────────────────────────────────────────────
   const locationPages: MetadataRoute.Sitemap = LOCATIONS.map((loc) => ({
     url: `${BASE_URL}/locations/${loc.province}/${loc.phuong}/${loc.slug}`,
     lastModified: NOW,
@@ -58,28 +75,35 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  // ── 7. Brand pages ────────────────────────────────────────────────────────
-  const brandPages: MetadataRoute.Sitemap = BRANDS.flatMap((brand) => [
-    {
-      url: `${BASE_URL}/brand/${brand.slug}`,
-      lastModified: NOW,
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    },
-    // Brand × province (lấy từ danh sách provinces có đại lý)
-    ...Object.keys(PROVINCES).map((province) => ({
-      url: `${BASE_URL}/brand/${brand.slug}/dai-ly/${province}`,
-      lastModified: NOW,
-      changeFrequency: "weekly" as const,
-      priority: 0.7,
-    })),
-  ]);
+  // ── 8. Brand pages — only brand×province combos that have real data ────────
+  const brandPages: MetadataRoute.Sitemap = BRANDS.flatMap((brand) => {
+    // Collect provinces where this brand has agents or locations
+    const brandProvinces = new Set<string>([
+      ...AGENTS.filter((a) => a.primary_brand === brand.name).map((a) => a.province),
+      ...LOCATIONS.filter((l) => l.primary_brand === brand.name).map((l) => l.province),
+    ]);
+    return [
+      {
+        url: `${BASE_URL}/brand/${brand.slug}`,
+        lastModified: NOW,
+        changeFrequency: "weekly" as const,
+        priority: 0.8,
+      },
+      ...[...brandProvinces].map((province) => ({
+        url: `${BASE_URL}/brand/${brand.slug}/dai-ly/${province}`,
+        lastModified: NOW,
+        changeFrequency: "weekly" as const,
+        priority: 0.7,
+      })),
+    ];
+  });
 
   return [
     ...staticPages,
     ...servicePages,
     ...provincePages,
     ...serviceProvincePages,
+    ...geoPages,
     ...agentPages,
     ...locationPages,
     ...brandPages,

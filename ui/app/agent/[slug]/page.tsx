@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/breadcrumb";
 import {
   MapPin, Clock, Award, Globe, Share2, Phone, Mail,
-  CheckCircle2, Car, Building2,
+  CheckCircle2, Car, Building2, ExternalLink, Languages, MessageCircle,
 } from "lucide-react";
-import { AGENTS, SERVICES, getProvinceLabel } from "@/lib/mock-data";
+import { AGENTS, SERVICES, getProvinceLabel, PROVINCE_GEO } from "@/lib/mock-data";
 
 // ─── Static params ────────────────────────────────────────────────────────────
 
@@ -27,15 +27,7 @@ export function generateStaticParams() {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function getGeoRegion(province: string): string {
-  const map: Record<string, string> = {
-    "tp-ho-chi-minh": "VN-SG",
-    "ha-noi": "VN-HN",
-    "da-nang": "VN-DN",
-    "binh-duong": "VN-57",
-    "dong-nai": "VN-39",
-    "can-tho": "VN-CT",
-  };
-  return map[province] ?? "VN";
+  return PROVINCE_GEO[province]?.iso ?? "VN";
 }
 
 function getCategoryLabel(category: string): string {
@@ -61,12 +53,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${agent.name} — ${agent.title} tại ${locationStr}`,
     description: `${agent.name} — ${agent.years_experience} năm kinh nghiệm ${getCategoryLabel(agent.category)}. ⭐ ${agent.rating}/5 (${agent.review_count} đánh giá). Đã xác minh. ☎ ${agent.phone.replace("+84", "0")}`,
-    openGraph: { type: "profile" },
+    openGraph: {
+      type: "profile",
+      url: `https://pro.thodia.so/agent/${agent.slug}`,
+      images: [{ url: `https://pro.thodia.so${agent.photo}`, width: 400, height: 400, alt: agent.name }],
+    },
     alternates: { canonical: `https://pro.thodia.so/agent/${agent.slug}` },
     other: {
       "geo.region": getGeoRegion(agent.province),
       "geo.placename": agent.ward_label ? `${agent.ward_label}, ${provinceLabel}` : provinceLabel,
-      ...(agent.lat && agent.lng ? {
+      ...(agent.lat != null && agent.lng != null ? {
         "geo.position": `${agent.lat};${agent.lng}`,
         ICBM: `${agent.lat}, ${agent.lng}`,
       } : {}),
@@ -112,12 +108,20 @@ function buildPersonSchema(agent: (typeof AGENTS)[number]) {
           skills: agent.services.join(", "),
         },
         ...(agent.authorized_brands.length > 0 ? {
-          worksFor: { "@type": "Organization", name: agent.authorized_brands[0] },
+          worksFor: {
+            "@type": "Organization",
+            name: agent.authorized_brands[0],
+            url: agent.brand_certification_url ?? undefined,
+          },
           brand: agent.authorized_brands.map((b) => ({ "@type": "Brand", name: b })),
         } : {}),
         areaServed: agent.ward_label
           ? [
-              { "@type": "AdministrativeArea", name: agent.ward_label },
+              {
+                "@type": "AdministrativeArea",
+                name: agent.ward_label,
+                description: `Phường hành chính thuộc ${agent.legacy_district} cũ, ${provinceLabel}`,
+              },
               { "@type": "City", name: provinceLabel },
             ]
           : [{ "@type": "City", name: provinceLabel }],
@@ -132,10 +136,17 @@ function buildPersonSchema(agent: (typeof AGENTS)[number]) {
             credentialCategory: "Professional License",
             identifier: agent.license,
             ...(agent.license_issuer ? {
-              recognizedBy: { "@type": "Organization", name: agent.license_issuer },
+              recognizedBy: {
+                "@type": "Organization",
+                name: agent.license_issuer,
+              },
+            } : {}),
+            ...(agent.brand_certification_url ? {
+              url: agent.brand_certification_url,
             } : {}),
           },
         } : {}),
+        knowsLanguage: agent.languages,
         sameAs: [agent.gbp_url, agent.facebook_url].filter(Boolean),
         aggregateRating: {
           "@type": "AggregateRating",
@@ -223,15 +234,20 @@ export default async function AgentSlugPage({ params }: PageProps) {
               </Avatar>
               <div className="space-y-3">
                 <div className="flex flex-wrap gap-2 items-center">
-                  <BadgeVerified />
+                  {agent.verified && <BadgeVerified />}
                   {agent.brand_tier && <BadgeBrandTier tier={agent.brand_tier} />}
                   {agent.agent_type === "freelance" && <BadgeFreelance />}
                   <Badge variant="secondary">{categoryLabel}</Badge>
+                  {agent.languages.length > 1 && (
+                    <Badge variant="outline" className="gap-1 text-xs">
+                      <Languages className="h-3 w-3" />{agent.languages.join(", ")}
+                    </Badge>
+                  )}
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{agent.name}</h1>
                 <p className="text-muted-foreground">{agent.title}</p>
                 <RatingStars rating={agent.rating} count={agent.review_count} size="md" />
-                <CTAButtons phone={agent.phone} zalo={agent.phone} size="default" />
+                <CTAButtons phone={agent.phone} zalo={agent.phone_zalo} size="default" />
               </div>
             </section>
 
@@ -244,6 +260,11 @@ export default async function AgentSlugPage({ params }: PageProps) {
                     <div>
                       <span className="font-medium">Điện thoại</span>
                       <p><a href={`tel:${agent.phone}`} className="text-primary hover:underline">{agent.phone}</a></p>
+                      {agent.phone_zalo && agent.phone_zalo !== agent.phone && (
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Zalo: <a href={`https://zalo.me/${agent.phone_zalo.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer" className="hover:underline">{agent.phone_zalo}</a>
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
@@ -278,7 +299,7 @@ export default async function AgentSlugPage({ params }: PageProps) {
 
             {/* Bio */}
             <section>
-              <h2 className="text-xl font-semibold mb-3">Giới thiệu</h2>
+              <h2 className="text-lg font-bold mb-3">Giới thiệu</h2>
               <p className="text-muted-foreground leading-relaxed">{agent.bio}</p>
               {(agent.license || agent.authorized_brands.length > 0) && (
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -301,6 +322,16 @@ export default async function AgentSlugPage({ params }: PageProps) {
                           <Car className="h-3 w-3" />{b}
                         </Badge>
                       ))}
+                      {agent.brand_certification_url && (
+                        <a
+                          href={agent.brand_certification_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                        >
+                          <ExternalLink className="h-3 w-3" />Xem chứng nhận đại lý
+                        </a>
+                      )}
                     </div>
                   )}
                 </div>
@@ -318,7 +349,7 @@ export default async function AgentSlugPage({ params }: PageProps) {
 
             {/* Services */}
             <section>
-              <h2 className="text-xl font-semibold mb-4">Dịch vụ cung cấp</h2>
+              <h2 className="text-lg font-bold mb-4">Dịch vụ cung cấp</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {agent.services.map((s) => (
                   <div key={s} className="flex items-center gap-2 text-sm p-3 rounded-lg border bg-muted/20">
@@ -335,7 +366,7 @@ export default async function AgentSlugPage({ params }: PageProps) {
             {agent.portfolio.length > 0 && (
               <>
                 <section>
-                  <h2 className="text-xl font-semibold mb-4">Giao dịch tiêu biểu</h2>
+                  <h2 className="text-lg font-bold mb-4">Giao dịch tiêu biểu</h2>
                   <div className="space-y-3">
                     {agent.portfolio.map((p, i) => (
                       <div key={`port-${i}`} className="flex items-center justify-between p-3 rounded-lg border bg-muted/30 text-sm">
@@ -357,7 +388,7 @@ export default async function AgentSlugPage({ params }: PageProps) {
 
             {/* Reviews */}
             <section>
-              <h2 className="text-xl font-semibold mb-4">Đánh giá ({agent.review_count})</h2>
+              <h2 className="text-lg font-bold mb-4">Đánh giá ({agent.review_count})</h2>
               <div className="mb-4 flex items-center gap-3 p-4 rounded-lg bg-muted/50">
                 <div className="text-4xl font-bold">{agent.rating}</div>
                 <div>
@@ -389,7 +420,7 @@ export default async function AgentSlugPage({ params }: PageProps) {
 
             {/* Area served */}
             <section>
-              <h2 className="text-xl font-semibold mb-3">Khu vực phục vụ</h2>
+              <h2 className="text-lg font-bold mb-3">Khu vực phục vụ</h2>
               {agent.ward_label ? (
                 <>
                   <div className="flex flex-wrap gap-2 mb-2">
@@ -398,7 +429,16 @@ export default async function AgentSlugPage({ params }: PageProps) {
                     </Badge>
                     <Badge variant="outline" className="text-sm">{provinceLabel}</Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  {agent.area_served_ward.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {agent.area_served_ward.map((slug) => (
+                        <Badge key={slug} variant="secondary" className="text-xs opacity-75">
+                          {slug.replace(/^phuong-/, "P. ").replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-2">
                     Khu vực {agent.legacy_district} cũ — tên địa danh quen thuộc trước thay đổi hành chính 2025
                   </p>
                 </>
@@ -423,12 +463,17 @@ export default async function AgentSlugPage({ params }: PageProps) {
                 <CardTitle className="text-base">Liên hệ {agent.name}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <CTAButtons phone={agent.phone} zalo={agent.phone} size="sm" />
+                <CTAButtons phone={agent.phone} zalo={agent.phone_zalo} size="sm" />
                 <Separator />
                 <div className="space-y-2 text-sm">
                   <a href={`mailto:${agent.email}`} className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
                     <Mail className="h-4 w-4" />{agent.email}
                   </a>
+                  {agent.phone_zalo && (
+                    <a href={`https://zalo.me/${agent.phone_zalo.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
+                      <MessageCircle className="h-4 w-4" />Zalo
+                    </a>
+                  )}
                   {agent.facebook_url && (
                     <a href={agent.facebook_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
                       <Share2 className="h-4 w-4" />Facebook
@@ -436,7 +481,7 @@ export default async function AgentSlugPage({ params }: PageProps) {
                   )}
                   {agent.gbp_url && (
                     <a href={agent.gbp_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-                      <Globe className="h-4 w-4" />Google Maps
+                      <Globe className="h-4 w-4" />Hồ sơ Google Business
                     </a>
                   )}
                 </div>

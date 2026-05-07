@@ -32,10 +32,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const serviceLabel = getServiceLabel(service);
   const provinceLabel = getProvinceLabel(province);
   const geo = PROVINCE_GEO[province];
+  const serviceAgents = getAgentsByService(service).filter((a) => a.province === province);
+  const provinceLocs = getLocationsByProvince(province).filter((l) => l.category === service);
+  const total = serviceAgents.length + provinceLocs.length;
   return {
     title: `Đại lý ${serviceLabel} uy tín tại ${provinceLabel}`,
-    description: `Tìm đại lý ${serviceLabel} đã xác minh tại ${provinceLabel}. Thông tin chuẩn xác, liên hệ trực tiếp.`,
-    alternates: { canonical: `https://pro.thodia.so/${service}/${province}` },
+    description: `Tìm ${total > 0 ? total : "hàng trăm"} đại lý ${serviceLabel} đã xác minh tại ${provinceLabel}. Thông tin chuẩn xác, liên hệ trực tiếp.`,
+    alternates: {
+      canonical: `https://pro.thodia.so/${service}/${province}`,
+    },
     ...(geo && {
       other: {
         "geo.region": geo.iso,
@@ -180,6 +185,13 @@ export default async function ServiceProvincePage({ params }: PageProps) {
 
         <Separator className="mb-5" />
 
+        {/* Intro paragraph — local context for SEO */}
+        <p className="text-sm text-muted-foreground leading-relaxed mb-5">
+          Danh sách <strong className="text-foreground">{allServiceAgents.length + allLocs.length}</strong> đại lý {serviceLabel.toLowerCase()} uy tín tại{" "}
+          <strong className="text-foreground">{provinceLabel}</strong>, đã xác minh và cập nhật theo địa danh hành chính 2025.
+          Thông tin đầy đủ gồm địa chỉ phường mới, điện thoại, đánh giá, giờ làm việc và chứng chỉ hành nghề.
+        </p>
+
         {/* Filters — isolated "use client" island, không ảnh hưởng Server Component tree */}
         <div className="mb-5">
           <FilterBar />
@@ -190,37 +202,36 @@ export default async function ServiceProvincePage({ params }: PageProps) {
           <section className="mb-6">
             <div className="flex items-center gap-2 mb-3">
               <Building2 className="h-3.5 w-3.5 text-primary" />
-              <h2 className="text-sm font-semibold">Văn phòng / Showroom</h2>
+              <h2 className="text-sm font-bold tracking-tight">Văn phòng / Showroom</h2>
             </div>
             <div className="space-y-2">
               {allLocs.map((loc) => (
                 <Link key={loc.slug} href={`/locations/${loc.province}/${loc.phuong}/${loc.slug}`}>
-                  <Card className="hover:border-primary/40 transition-colors cursor-pointer">
-                    <CardContent className="p-3 flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
-                        <Building2 className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <p className="font-medium text-sm">{loc.name}</p>
-                          <BadgeVerified label="✓" />
-                          {loc.brand_tier && <BadgeBrandTier tier={loc.brand_tier} />}
-                          {loc.primary_brand && (
-                            <Badge variant="secondary" className="text-xs">{loc.primary_brand}</Badge>
-                          )}
-                          {loc.is_authorized && (
-                            <Badge variant="outline" className="text-xs hidden sm:inline-flex">Chính thức</Badge>
-                          )}
+                  <Card className="hover:border-primary/40 hover:shadow-md transition-all cursor-pointer group">
+                    <CardContent className="p-0">
+                      <div className="flex items-stretch gap-0">
+                        {/* Square icon block */}
+                        <div className="w-16 shrink-0 bg-primary/8 flex items-center justify-center rounded-l-xl border-r">
+                          <Building2 className="h-5 w-5 text-primary/70 group-hover:text-primary transition-colors" />
                         </div>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                          <MapPin className="h-2.5 w-2.5 shrink-0" />
-                          {loc.ward_label}
-                          <span className="opacity-60">({loc.legacy_district})</span>
-                        </p>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <RatingStars rating={loc.rating} count={loc.review_count} size="sm" showCount={false} />
-                        <p className="text-xs text-muted-foreground">{loc.rating} · {loc.review_count}</p>
+                        {/* Main content */}
+                        <div className="flex-1 min-w-0 px-3.5 py-3">
+                          <p className="font-bold text-sm leading-tight mb-1 truncate">{loc.name}</p>
+                          <div className="flex flex-wrap gap-1 mb-1.5">
+                            {loc.verified && <span className="text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">✓ XÁC MINH</span>}
+                            {loc.brand_tier === "gold" && <span className="text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-yellow-50 text-yellow-700 border border-yellow-200">GOLD</span>}
+                            {loc.is_authorized && <span className="text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-muted text-muted-foreground border">CHÍNH THỨC</span>}
+                          </div>
+                          <p className="text-[11px] text-muted-foreground flex items-center gap-1 truncate">
+                            <MapPin className="h-2.5 w-2.5 shrink-0" />{loc.ward_label}
+                            <span className="opacity-50">· {loc.legacy_district}</span>
+                          </p>
+                        </div>
+                        {/* Stat column */}
+                        <div className="shrink-0 flex flex-col items-center justify-center px-3.5 border-l min-w-[56px]">
+                          <p className="text-base font-bold leading-none">{loc.rating.toFixed(1)}</p>
+                          <p className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground mt-0.5">{loc.review_count} đg</p>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -239,46 +250,43 @@ export default async function ServiceProvincePage({ params }: PageProps) {
           <section className="mb-6">
             <div className="flex items-center gap-2 mb-3">
               <Users className="h-3.5 w-3.5 text-primary" />
-              <h2 className="text-sm font-semibold">Đại lý cá nhân</h2>
+              <h2 className="text-sm font-bold tracking-tight">Đại lý cá nhân</h2>
             </div>
             <div className="space-y-2">
               {allServiceAgents.map((agent) => (
                 <Link key={agent.slug} href={`/agent/${agent.slug}`}>
-                  <Card className="hover:border-primary/40 transition-colors cursor-pointer">
-                    <CardContent className="p-3 flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-primary text-sm shrink-0">
-                        {agent.name.charAt(0)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <p className="font-medium text-sm">{agent.name}</p>
-                          <BadgeVerified label="✓" />
-                          {agent.brand_tier && <BadgeBrandTier tier={agent.brand_tier} />}
-                          {agent.agent_type === "freelance" && (
-                            <Badge variant="secondary" className="text-xs">Độc lập</Badge>
-                          )}
+                  <Card className="hover:border-primary/40 hover:shadow-md transition-all cursor-pointer group">
+                    <CardContent className="p-0">
+                      <div className="flex items-stretch">
+                        {/* Square avatar block */}
+                        <div className="w-16 shrink-0 bg-primary/8 flex items-center justify-center rounded-l-xl border-r">
+                          <div className="h-9 w-9 rounded-lg bg-primary/20 flex items-center justify-center font-bold text-primary text-sm">
+                            {agent.name.charAt(0)}
+                          </div>
                         </div>
-                        <p className="text-xs text-muted-foreground">{agent.title}</p>
-                        {agent.ward_label ? (
-                          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                            <MapPin className="h-2.5 w-2.5" />
-                            {agent.ward_label} <span className="opacity-60">({agent.legacy_district})</span>
-                          </p>
-                        ) : (
-                          <p className="text-xs text-muted-foreground mt-0.5">Phủ sóng toàn tỉnh</p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <div className="text-right hidden sm:block">
-                          <p className="text-xs text-muted-foreground">{agent.years_experience} năm KN</p>
-                          <RatingStars rating={agent.rating} count={agent.review_count} size="sm" showCount={false} />
+                        {/* Main info */}
+                        <div className="flex-1 min-w-0 px-3.5 py-3">
+                          <p className="font-bold text-sm leading-tight mb-0.5">{agent.name}</p>
+                          <p className="text-[11px] text-muted-foreground mb-1.5 truncate">{agent.title}</p>
+                          <div className="flex flex-wrap gap-1">
+                            {agent.verified && <span className="text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-700">✓ XÁC MINH</span>}
+                            {agent.brand_tier === "gold" && <span className="text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-yellow-50 text-yellow-700 border border-yellow-200 dark:bg-yellow-900/40 dark:text-yellow-300 dark:border-yellow-700">GOLD</span>}
+                            {agent.agent_type === "freelance" && <span className="text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-muted text-muted-foreground border">ĐỘC LẬP</span>}
+                          </div>
                         </div>
-                        <a
-                          href={`tel:${agent.phone}`}
-                          className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md border hover:bg-muted transition-colors"
-                        >
-                          <Phone className="h-3 w-3" />Gọi
-                        </a>
+                        {/* Stat + call */}
+                        <div className="shrink-0 flex flex-col items-center justify-center px-3.5 border-l gap-1.5 min-w-[60px]">
+                          <div className="text-center">
+                            <p className="text-base font-bold leading-none">{agent.rating.toFixed(1)}</p>
+                            <p className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground">{agent.years_experience}yr</p>
+                          </div>
+                          <a
+                            href={`tel:${agent.phone}`}
+                            className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wide px-2 py-1 rounded-md bg-foreground text-background hover:bg-foreground/90 transition-colors"
+                          >
+                            <Phone className="h-2.5 w-2.5" />Gọi
+                          </a>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

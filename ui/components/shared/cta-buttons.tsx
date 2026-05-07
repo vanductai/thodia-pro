@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Phone, MessageCircle, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -11,33 +11,43 @@ interface CTAButtonsProps {
 
 export function CTAButtons({ phone, zalo, showSchedule = true, size = "default" }: CTAButtonsProps) {
   const phoneClean = phone.replace(/\s/g, "");
-  const padding = size === "sm" ? "px-3 py-1.5 text-xs" : size === "lg" ? "px-6 py-3 text-base" : "px-4 py-2 text-sm";
+  const btnSize = size === "lg" ? "lg" : size === "sm" ? "sm" : "default";
 
   return (
     <div className="flex flex-wrap gap-2">
+      {/* Dark primary — Direction C editorial style */}
       <a
         href={`tel:${phoneClean}`}
         id="cta-call"
-        className={cn("inline-flex items-center font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors", padding)}
+        className={cn(
+          buttonVariants({ size: btnSize }),
+          "bg-foreground text-background hover:bg-foreground/90"
+        )}
       >
-        <Phone className="mr-2 h-4 w-4" />
+        <Phone className="h-4 w-4" />
         Gọi ngay
       </a>
+
+      {/* Outline teal — phân biệt rõ với primary */}
       {zalo && (
         <a
           href={`https://zalo.me/${phoneClean}`}
           target="_blank"
           rel="noopener noreferrer"
           id="cta-zalo"
-          className={cn("inline-flex items-center font-medium rounded-lg border border-blue-500 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950 transition-colors", padding)}
+          className={cn(
+            buttonVariants({ variant: "outline", size: btnSize }),
+            "border-primary/50 text-primary hover:bg-primary/10 dark:hover:bg-primary/20"
+          )}
         >
-          <MessageCircle className="mr-2 h-4 w-4" />
+          <MessageCircle className="h-4 w-4" />
           Zalo
         </a>
       )}
+
       {showSchedule && (
-        <Button size={size} variant="outline" id="cta-schedule">
-          <Calendar className="mr-2 h-4 w-4" />
+        <Button size={btnSize} variant="outline" id="cta-schedule">
+          <Calendar className="h-4 w-4" />
           Đặt lịch tư vấn
         </Button>
       )}

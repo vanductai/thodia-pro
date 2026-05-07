@@ -42,6 +42,35 @@ const QUAN_REDIRECTS = [
 ].map((r) => ({ ...r, permanent: true }));
 
 const nextConfig: NextConfig = {
+  // ── Turbopack configuration ──────────────────────────────────────────────
+  // Explicit config prevents "works in dev but not build" bugs.
+  // next dev  → Turbopack (fast HMR, Rust-based)
+  // next build → Webpack  (stable, well-tested for production)
+  // Run `npm run dev:webpack` to compare behaviour if you suspect bundler differences.
+  turbopack: {
+    // Module aliases — mirrors tsconfig @/* paths so Turbopack agrees with Webpack.
+    // Next.js reads tsconfig.paths automatically, but being explicit prevents
+    // edge cases when tsconfig extends other files.
+    resolveAlias: {
+      "@/components": "./components",
+      "@/lib": "./lib",
+      "@/app": "./app",
+    },
+
+    // File extensions Turbopack will try in order when an import has no extension.
+    resolveExtensions: [".tsx", ".ts", ".jsx", ".js", ".json", ".css"],
+
+    // Loader rules for non-standard file types.
+    // Currently empty — add entries here when you integrate SVG/MDX/GraphQL/etc.
+    // Example for SVG:
+    //   rules: { "*.svg": [{ loader: "@svgr/webpack", options: { icon: true } }] }
+    rules: {},
+  },
+
+  // ── Packages that must run in Node (not edge/browser) ────────────────────
+  // Prevents "cannot use X in edge runtime" errors for heavy server libs.
+  serverExternalPackages: [],
+
   // ── Image optimization ───────────────────────────────────────────────────
   images: {
     formats: ["image/avif", "image/webp"],

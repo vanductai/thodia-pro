@@ -26,7 +26,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         // Googlebot — cho phép crawl tất cả resource quan trọng
         userAgent: "Googlebot",
-        allow: ["/", "/images/", "/*.jpg$", "/*.png$", "/*.webp$", "/*.svg$"],
+        allow: ["/", "/images/", "/css/", "/js/", "/*.jpg$", "/*.png$", "/*.webp$", "/*.svg$"],
         disallow: ["/tim-kiem", "/admin/", "/api/"],
       },
       {

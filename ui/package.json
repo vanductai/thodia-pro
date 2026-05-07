@@ -3,10 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
+    "dev:webpack": "next dev --no-turbopack",
+    "dev:fresh": "npm run clean:turbo && next dev --turbopack",
     "build": "next build",
+    "build:fresh": "npm run clean && next build",
+    "build:analyze": "ANALYZE=true next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "type-check": "tsc --noEmit",
+    "clean:turbo": "rm -rf .next/dev",
+    "clean:build": "rm -rf .next/server .next/static .next/cache .next/build",
+    "clean": "rm -rf .next tsconfig.tsbuildinfo",
+    "clean:all": "rm -rf .next tsconfig.tsbuildinfo node_modules/.cache"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",

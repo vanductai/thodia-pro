@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AppSidebar, MobileTopBar } from "@/components/layout/app-sidebar";
@@ -9,6 +9,13 @@ const inter = Inter({
   subsets: ["latin", "vietnamese"],
   variable: "--font-sans",
   display: "swap",
+});
+
+const jakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin", "vietnamese"],
+  variable: "--font-display",
+  display: "swap",
+  weight: ["500", "600", "700", "800"],
 });
 
 // JetBrains Mono chỉ load khi cần (code blocks) — xóa khỏi global load
@@ -71,7 +78,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   };
 
   return (
-    <html lang="vi" suppressHydrationWarning className={inter.variable}>
+    <html lang="vi" suppressHydrationWarning className={`${inter.variable} ${jakartaSans.variable}`}>
       <head>
         <script
           type="application/ld+json"
