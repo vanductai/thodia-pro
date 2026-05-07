@@ -150,7 +150,7 @@ export default function AgentFreelancePage() {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} suppressHydrationWarning />
 
       <div className="container mx-auto max-w-6xl px-4 py-6">
         <Breadcrumb className="mb-6">

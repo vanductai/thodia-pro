@@ -131,7 +131,7 @@ export default async function ServiceProvincePage({ params }: PageProps) {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} suppressHydrationWarning />
 
       <div className="container mx-auto max-w-5xl px-4 py-6">
         <Breadcrumb className="mb-5">
@@ -254,8 +254,9 @@ export default async function ServiceProvincePage({ params }: PageProps) {
             </div>
             <div className="space-y-2">
               {allServiceAgents.map((agent) => (
-                <Link key={agent.slug} href={`/agent/${agent.slug}`}>
-                  <Card className="hover:border-primary/40 hover:shadow-md transition-all cursor-pointer group">
+                <div key={agent.slug} className="relative group">
+                  <Link href={`/agent/${agent.slug}`} className="absolute inset-0 rounded-xl z-0" aria-label={agent.name} />
+                  <Card className="hover:border-primary/40 hover:shadow-md transition-all">
                     <CardContent className="p-0">
                       <div className="flex items-stretch">
                         {/* Square avatar block */}
@@ -274,8 +275,8 @@ export default async function ServiceProvincePage({ params }: PageProps) {
                             {agent.agent_type === "freelance" && <span className="text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-muted text-muted-foreground border">ĐỘC LẬP</span>}
                           </div>
                         </div>
-                        {/* Stat + call */}
-                        <div className="shrink-0 flex flex-col items-center justify-center px-3.5 border-l gap-1.5 min-w-[60px]">
+                        {/* Stat + call — z-10 để nổi lên trên overlay Link */}
+                        <div className="relative z-10 shrink-0 flex flex-col items-center justify-center px-3.5 border-l gap-1.5 min-w-[60px]">
                           <div className="text-center">
                             <p className="text-base font-bold leading-none">{agent.rating.toFixed(1)}</p>
                             <p className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground">{agent.years_experience}yr</p>
@@ -290,7 +291,7 @@ export default async function ServiceProvincePage({ params }: PageProps) {
                       </div>
                     </CardContent>
                   </Card>
-                </Link>
+                </div>
               ))}
             </div>
           </section>

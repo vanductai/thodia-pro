@@ -225,7 +225,7 @@ export default async function ServiceAreaPage({ params }: PageProps) {
 
     return (
       <>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} suppressHydrationWarning />
 
         <div className="container mx-auto max-w-5xl px-4 py-6">
           <Breadcrumb className="mb-5">
@@ -404,7 +404,7 @@ export default async function ServiceAreaPage({ params }: PageProps) {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} suppressHydrationWarning />
 
       <div className="container mx-auto max-w-5xl px-4 py-6">
         <Breadcrumb className="mb-5">
@@ -490,10 +490,11 @@ export default async function ServiceAreaPage({ params }: PageProps) {
             </div>
             <div className="space-y-2">
               {wardAgents.map((agent) => (
-                <Link key={agent.slug} href={`/agent/${agent.slug}`}>
-                  <Card className="hover:border-primary/40 transition-colors cursor-pointer">
+                <div key={agent.slug} className="relative group">
+                  <Link href={`/agent/${agent.slug}`} className="absolute inset-0 rounded-xl z-0" aria-label={agent.name} />
+                  <Card className="hover:border-primary/40 transition-colors">
                     <CardContent className="p-3 flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-primary text-sm shrink-0">
+                      <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center font-semibold text-primary text-sm shrink-0">
                         {agent.name.charAt(0)}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -510,21 +511,21 @@ export default async function ServiceAreaPage({ params }: PageProps) {
                           </p>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="relative z-10 flex items-center gap-2 shrink-0">
                         <div className="text-right hidden sm:block">
                           <p className="text-xs text-muted-foreground">{agent.years_experience} năm KN</p>
                           <RatingStars rating={agent.rating} count={agent.review_count} size="sm" showCount={false} />
                         </div>
                         <a
                           href={`tel:${agent.phone}`}
-                          className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md border hover:bg-muted transition-colors"
+                          className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md border hover:bg-muted transition-colors bg-background"
                         >
                           <Phone className="h-3 w-3" />Gọi
                         </a>
                       </div>
                     </CardContent>
                   </Card>
-                </Link>
+                </div>
               ))}
             </div>
           </section>

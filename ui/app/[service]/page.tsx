@@ -228,7 +228,7 @@ function ProvinceListingPage({
 }) {
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} suppressHydrationWarning />
 
       <div className="container mx-auto max-w-5xl px-4 py-6">
         <Breadcrumb className="mb-5">
@@ -347,7 +347,8 @@ function ProvinceListingPage({
             </div>
             <div className="space-y-2">
               {agents.slice(0, 6).map((agent) => (
-                <Link key={agent.slug} href={`/agent/${agent.slug}`}>
+                <div key={agent.slug} className="relative">
+                  <Link href={`/agent/${agent.slug}`} className="absolute inset-0 z-0 rounded-lg" aria-label={agent.name} />
                   <Card className="hover:border-primary/40 transition-colors cursor-pointer">
                     <CardContent className="p-3 flex items-center gap-3">
                       <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-primary text-sm shrink-0">
@@ -385,14 +386,14 @@ function ProvinceListingPage({
                         </div>
                         <a
                           href={`tel:${agent.phone}`}
-                          className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md border hover:bg-muted transition-colors"
+                          className="relative z-10 inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md border hover:bg-muted transition-colors"
                         >
                           <Phone className="h-3 w-3" />Gọi
                         </a>
                       </div>
                     </CardContent>
                   </Card>
-                </Link>
+                </div>
               ))}
             </div>
           </section>
@@ -451,7 +452,7 @@ export default async function DynamicSlugPage({ params }: PageProps) {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} suppressHydrationWarning />
 
       <div className="container mx-auto max-w-5xl px-4 py-6">
         <Breadcrumb className="mb-5">
@@ -577,7 +578,8 @@ export default async function DynamicSlugPage({ params }: PageProps) {
             </div>
             <div className="space-y-2">
               {featuredAgents.map((agent) => (
-                <Link key={agent.slug} href={`/agent/${agent.slug}`}>
+                <div key={agent.slug} className="relative">
+                  <Link href={`/agent/${agent.slug}`} className="absolute inset-0 z-0 rounded-lg" aria-label={agent.name} />
                   <Card className="hover:border-primary/40 transition-colors cursor-pointer">
                     <CardContent className="p-3 flex items-center gap-3">
                       <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-primary text-sm shrink-0">
@@ -612,14 +614,14 @@ export default async function DynamicSlugPage({ params }: PageProps) {
                         </div>
                         <a
                           href={`tel:${agent.phone}`}
-                          className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md border hover:bg-muted transition-colors"
+                          className="relative z-10 inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md border hover:bg-muted transition-colors"
                         >
                           <Phone className="h-3 w-3" />Gọi
                         </a>
                       </div>
                     </CardContent>
                   </Card>
-                </Link>
+                </div>
               ))}
             </div>
           </section>

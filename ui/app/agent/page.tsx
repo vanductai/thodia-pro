@@ -51,7 +51,8 @@ export default function AgentListingPage() {
           </div>
           <div className="space-y-2">
             {AGENTS.map((agent) => (
-              <Link key={agent.slug} href={`/agent/${agent.slug}`}>
+              <div key={agent.slug} className="relative">
+                <Link href={`/agent/${agent.slug}`} className="absolute inset-0 z-0 rounded-lg" aria-label={agent.name} />
                 <Card className="hover:border-primary/40 transition-colors cursor-pointer">
                   <CardContent className="p-3 flex items-center gap-3">
                     <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-primary text-sm shrink-0">
@@ -84,14 +85,14 @@ export default function AgentListingPage() {
                       <p className="text-xs text-muted-foreground">{agent.rating} · {agent.review_count} đánh giá</p>
                       <a
                         href={`tel:${agent.phone}`}
-                        className="inline-flex items-center gap-1 text-xs mt-1.5 px-2 py-0.5 rounded border hover:bg-muted transition-colors"
+                        className="relative z-10 inline-flex items-center gap-1 text-xs mt-1.5 px-2 py-0.5 rounded border hover:bg-muted transition-colors"
                       >
                         <Phone className="h-3 w-3" />Gọi
                       </a>
                     </div>
                   </CardContent>
                 </Card>
-              </Link>
+              </div>
             ))}
           </div>
         </section>
