@@ -215,7 +215,7 @@ export default function HomePage() {
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
             {TOP_PROVINCES.map((p) => (
-              <Link key={p.slug} href={`/bds/${p.slug}`}>
+              <Link key={p.slug} href={`/${p.slug}`}>
                 <Card className="hover:border-primary/40 transition-colors cursor-pointer text-center">
                   <CardContent className="p-3">
                     <MapPin className="h-3.5 w-3.5 text-primary mx-auto mb-1" />
@@ -240,7 +240,7 @@ export default function HomePage() {
               <div key={cluster.slug}>
                 <div className="flex items-center gap-2 mb-2">
                   <Link
-                    href={`/bds/tp-ho-chi-minh/${cluster.slug}`}
+                    href={`/bds/${cluster.province}/${cluster.slug}`}
                     className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-1"
                   >
                     <MapPin className="h-3.5 w-3.5 text-primary" />
