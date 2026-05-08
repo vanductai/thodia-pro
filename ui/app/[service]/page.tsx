@@ -50,6 +50,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: `Đại lý uy tín tại ${label} — Pro.Thodia.so`,
       description: `Tìm đại lý BĐS, xe cộ, bảo hiểm đã xác minh tại ${label}. Thông tin chuẩn xác, liên hệ trực tiếp, đánh giá thực từ khách hàng.`,
       alternates: { canonical: `https://pro.thodia.so/${slug}` },
+      // SEO-07: openGraph cho trang tỉnh/thành phố
+      openGraph: {
+        type: "website",
+        url: `https://pro.thodia.so/${slug}`,
+        title: `Đại lý uy tín tại ${label} — Pro.Thodia.so`,
+        description: `Tìm đại lý BĐS, xe cộ, bảo hiểm đã xác minh tại ${label}.`,
+        images: [{ url: "/og-image.png", width: 1200, height: 630, alt: `Đại lý uy tín tại ${label}` }],
+        locale: "vi_VN",
+      },
     };
   }
 
@@ -60,6 +69,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: `Đại lý ${serviceLabel} uy tín toàn quốc — Pro.Thodia.so`,
       description: `Tìm đại lý ${serviceLabel} đã xác minh trên toàn quốc. Thông tin chuẩn xác, liên hệ trực tiếp, đánh giá thực từ khách hàng.`,
       alternates: { canonical: `https://pro.thodia.so/${slug}` },
+      // SEO-07: openGraph cho trang danh mục dịch vụ
+      openGraph: {
+        type: "website",
+        url: `https://pro.thodia.so/${slug}`,
+        title: `Đại lý ${serviceLabel} Uy tín toàn quốc — Pro.Thodia.so`,
+        description: `Tìm đại lý ${serviceLabel} đã xác minh trên toàn quốc. Liên hệ trực tiếp, đánh giá thực.`,
+        images: [{ url: "/og-image.png", width: 1200, height: 630, alt: `Đại lý ${serviceLabel} Việt Nam — Pro.Thodia.so` }],
+        locale: "vi_VN",
+      },
     };
   }
 

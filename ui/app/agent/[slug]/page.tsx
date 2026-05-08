@@ -56,7 +56,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       type: "profile",
       url: `https://pro.thodia.so/agent/${agent.slug}`,
-      images: [{ url: `https://pro.thodia.so${agent.photo}`, width: 400, height: 400, alt: agent.name }],
+      // SEO-08: profile type yêu cầu first/last name props
+      firstName: agent.name.split(" ").slice(-1)[0],   // họ cuối là “first name” trong tiếng Việt
+      lastName: agent.name.split(" ").slice(0, -1).join(" "),
+      images: [{ url: `https://pro.thodia.so${agent.photo}`, width: 400, height: 400, alt: `Ảnh đại lý ${agent.name}` }],
+    },
+    twitter: {
+      card: "summary",
+      title: `${agent.name} — ${getCategoryLabel(agent.category)} tại ${locationStr}`,
+      description: `⭐ ${agent.rating}/5 · ${agent.review_count} đánh giá · ${agent.years_experience} năm kinh nghiệm`,
+      images: [`https://pro.thodia.so${agent.photo}`],
     },
     alternates: { canonical: `https://pro.thodia.so/agent/${agent.slug}` },
     other: {

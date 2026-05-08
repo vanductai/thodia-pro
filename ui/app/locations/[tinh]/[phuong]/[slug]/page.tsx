@@ -60,7 +60,12 @@ function buildSchema(loc: (typeof LOCATIONS)[number], tinh: string, phuong: stri
         "@type": ["LocalBusiness", loc.schema_type],
         "@id": `https://pro.thodia.so/locations/${tinh}/${phuong}/${loc.slug}#location`,
         name: loc.name,
-        image: loc.image,
+        // SEO-09: image phải là absolute URL — Google Rich Results bắt buộc
+        image: loc.image
+          ? loc.image.startsWith("http")
+            ? loc.image
+            : `https://pro.thodia.so${loc.image}`
+          : undefined,
         telephone: loc.phone,
         email: loc.email,
         url: `https://pro.thodia.so/locations/${tinh}/${phuong}/${loc.slug}`,

@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   },
   description:
     "Tìm kiếm đại lý kinh doanh bất động sản, xe cộ và bảo hiểm uy tín tại Việt Nam. Thông tin chính xác, đã xác minh, chuẩn Local SEO.",
-  keywords: ["đại lý bđs", "môi giới bất động sản", "đại lý xe hơi", "bảo hiểm", "danh bạ đại lý"],
+  // keywords: deprecated by Google since 2009, không thêm để tránh signal tiêu cực
   authors: [{ name: "Pro.Thodia.so" }],
   creator: "Thodia",
   openGraph: {
@@ -37,20 +37,22 @@ export const metadata: Metadata = {
     locale: "vi_VN",
     url: "https://pro.thodia.so",
     siteName: "Pro.Thodia.so",
-    title: "Pro.Thodia.so - Danh bạ Đại lý Kinh doanh Việt Nam",
-    description: "Tìm kiếm đại lý BĐS, xe cộ, bảo hiểm uy tín tại Việt Nam",
-    images: [{ url: "/og-image.svg", width: 1200, height: 630, alt: "Pro.Thodia.so — Danh bạ Đại lý Kinh doanh Việt Nam" }],
+    title: "Pro.Thodia.so — Danh bạ Đại lý Kinh doanh Việt Nam",
+    description: "Tìm kiếm đại lý BĐS, xe cộ, bảo hiểm uy tín tại Việt Nam. 1,847+ đại lý đã xác minh, 63 tỉnh thành.",
+    // SEO-01: dùng PNG thay SVG — Facebook/Zalo/Twitter không render SVG
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Pro.Thodia.so — Danh bạ Đại lý Kinh doanh Việt Nam" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Pro.Thodia.so — Danh bạ Đại lý Kinh doanh Việt Nam",
     description: "Tìm đại lý BĐS, xe cộ, bảo hiểm uy tín tại Việt Nam. 1,847+ đại lý đã xác minh.",
-    images: ["/og-image.svg"],
+    images: ["/og-image.png"], // SEO-01: PNG thay SVG
   },
   robots: { index: true, follow: true },
   icons: {
     icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+    apple: "/apple-touch-icon.png", // SEO-02: file thực tế đã có trong /public
+    shortcut: "/favicon.ico",
   },
 };
 

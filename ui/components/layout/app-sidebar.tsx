@@ -20,13 +20,14 @@ const NAV_MAIN = [
 const NAV_SECONDARY = [
   { label: "Thương hiệu", href: "/brand", icon: Tag },
   { label: "Đại lý", href: "/agent", icon: Users },
-  { label: "Tìm kiếm", href: "/tim-kiem", icon: Search },
+  // SEO-05: /tim-kiem là noindex page — dùng nofollow để tránh PageRank rò rỉ
+  { label: "Tìm kiếm", href: "/tim-kiem", icon: Search, rel: "nofollow" },
 ];
 
 // ─── Nav item ──────────────────────────────────────────────────────────────────
 function NavItem({
-  href, icon: Icon, label, collapsed, onClick,
-}: { href: string; icon: React.ElementType; label: string; collapsed: boolean; onClick?: () => void }) {
+  href, icon: Icon, label, collapsed, onClick, rel,
+}: { href: string; icon: React.ElementType; label: string; collapsed: boolean; onClick?: () => void; rel?: string }) {
   const pathname = usePathname();
   const isActive = pathname === href || (href !== "/" && pathname.startsWith(href));
   return (
@@ -34,6 +35,7 @@ function NavItem({
       href={href}
       title={collapsed ? label : undefined}
       onClick={onClick}
+      rel={rel}
       className={cn(
         "flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-sm transition-colors",
         isActive

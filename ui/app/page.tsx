@@ -48,7 +48,7 @@ export default function HomePage() {
         <div className="max-w-2xl">
           <p className="text-xs text-muted-foreground mb-1">🇻🇳 Danh bạ đại lý kinh doanh Việt Nam</p>
           <h1 className="text-xl font-semibold mb-3">
-            Tìm <span className="text-primary">đại lý uy tín</span> — BĐS · Xe cộ · Bảo hiểm
+            Danh bạ <span className="text-primary">Đại lý Uy tín</span> — BĐS · Xe cộ · Bảo hiểm tại Việt Nam
           </h1>
           <div className="flex gap-2 mb-4">
             <div className="relative flex-1">

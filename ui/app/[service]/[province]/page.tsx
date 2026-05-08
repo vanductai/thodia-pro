@@ -298,6 +298,14 @@ export default async function ServiceProvincePage({ params }: PageProps) {
         )}
 
         {/* Pagination */}
+        {/* SEO-12 TODO: Khi implement pagination thật, thêm rel="prev"/rel="next" vào generateMetadata:
+          alternates: {
+            canonical: `.../${service}/${province}`,
+            ...(page > 1 && { prev: `...?page=${page - 1}` }),
+            ...(hasNextPage && { next: `...?page=${page + 1}` }),
+          }
+          và sử dụng clean URL (không query string) theo /[province]/page/[n] pattern.
+        */}
         <div className="flex justify-center gap-1.5" aria-label="Phân trang">
           <button disabled className="h-7 px-2.5 text-xs inline-flex items-center rounded-md border border-border bg-background opacity-50 cursor-not-allowed">← Trước</button>
           <button aria-current="page" className="h-7 px-2.5 text-xs inline-flex items-center rounded-md bg-primary text-primary-foreground font-medium">1</button>
