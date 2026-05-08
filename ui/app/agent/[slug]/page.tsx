@@ -89,7 +89,7 @@ function buildPersonSchema(agent: (typeof AGENTS)[number]) {
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": "Person",
+        "@type": ["RealEstateAgent", "Person"],
         "@id": `https://pro.thodia.so/agent/${agent.slug}#person`,
         name: agent.name,
         jobTitle: agent.title,

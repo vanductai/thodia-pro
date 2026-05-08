@@ -57,7 +57,7 @@ function buildFreelanceSchema(agent: typeof FREELANCE_AGENT) {
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": "Person",
+        "@type": ["AutoDealer", "Person"],
         "@id": `https://pro.thodia.so/agent/${agent.slug}#person`,
         name: agent.name,
         jobTitle: agent.title,
